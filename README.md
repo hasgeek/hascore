@@ -1,2 +1,2 @@
-hascore: HasGeek Event API
+HasCore: HasGeek Event API
 ==========================
