@@ -5,7 +5,8 @@ from hascore.models import db, BaseMixin
 
 __all__ = ['Tag']
 
-class Tag(db.Model, BaseMixin):
+
+class Tag(BaseMixin, db.Model):
     __tablename__ = 'tag'
     name = db.Column(db.Unicode(80), unique=True, nullable=False)
     title = db.Column(db.Unicode(80), unique=True, nullable=False)
@@ -27,9 +28,9 @@ class Tag(db.Model, BaseMixin):
                 return tag
 
     def rename(self, title):
-        name = makename(tagname)
+        name = makename(title)
         if self.query.filter_by(name=name).first() is not None:
-            raise ValueError, u"Name already in use"
+            raise ValueError(u"Name already in use")
         else:
             self.name = name
             self.title = title
