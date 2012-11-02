@@ -73,4 +73,48 @@ def schedule_list(profile, workspace):
         return jsonp(status='error', error='unknown-profile', description="No such profile. Use the buid")
     if workspace != 'Mg8vrAAlSIanvE3qsZu2Dg':
         return jsonp(status='error', error='unknown-workspace', description="No such workspace. Use the buid")
-    return jsonp()
+    return jsonp({
+        'venues': {
+            'avi14aHLQruydl9b_03ORA': {
+                'buid': 'avi14aHLQruydl9b_03ORA',
+                'title': 'MLR Convention Centre, Whitefield',
+                'location': {  # GeoJSON geometry object
+                    'type': 'Point',
+                    'coordinates': [12.9991, 77.7021],
+                    },
+                'rooms': {
+                    'eXUTAdkvSEe0b2BL0tVWZw': {
+                        'buid': 'eXUTAdkvSEe0b2BL0tVWZw',
+                        'title': 'Auditorium'
+                        },
+                    'uEJqjqLIT9WqOGHF_E8LVQ': {
+                        'buid': 'uEJqjqLIT9WqOGHF_E8LVQ',
+                        'title': 'Banquet Hall'
+                        },
+                    'BDe5XDqHRP2qtblGp3bK6A': {
+                        'buid': 'BDe5XDqHRP2qtblGp3bK6A',
+                        'title': 'Discussion Room'
+                        }
+                    }
+                }
+            },
+        'profiles': {
+            'off7nXRQQ7-S1ZK-D_tIdQ': {
+                'name': 'droidconin',
+                'title': 'Droidcon India',
+                'buid': 'off7nXRQQ7-S1ZK-D_tIdQ',
+                },
+            },
+        'workspaces': {
+            'Mg8vrAAlSIanvE3qsZu2Dg': {
+                'profile_id': 'off7nXRQQ7-S1ZK-D_tIdQ',
+                'buid': 'Mg8vrAAlSIanvE3qsZu2Dg',
+                'name': '2012',
+                'title': 'Droidcon India 2012',
+                'short_title': '2012',
+                'venues': ['avi14aHLQruydl9b_03ORA'],
+                'sessions': [
+                    ]
+                },
+            },
+        })
