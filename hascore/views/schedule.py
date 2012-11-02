@@ -1,7 +1,5 @@
-from flask import request, Response
-
 from hascore import app
-from hascore.models import db, User, EventSeries, EventEdition, EventRoom, EventSlot, EventSessionType, EventSession
+
 
 @app.route('/1/events')
 def eventseries_list():

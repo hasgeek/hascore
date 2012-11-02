@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from coaster import makename
+from coaster import make_name
 from hascore.models import db, BaseMixin
 
 __all__ = ['Tag']
@@ -17,7 +17,7 @@ class Tag(BaseMixin, db.Model):
         if tag:
             return tag
         else:
-            name = makename(title)
+            name = make_name(title)
             # Is this name already in use? If yes, return it
             tag = cls.query.filter_by(name=name).first()
             if tag:
@@ -28,7 +28,7 @@ class Tag(BaseMixin, db.Model):
                 return tag
 
     def rename(self, title):
-        name = makename(title)
+        name = make_name(title)
         if self.query.filter_by(name=name).first() is not None:
             raise ValueError(u"Name already in use")
         else:

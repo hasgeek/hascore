@@ -10,4 +10,8 @@ test.db
 docs/_build
 build/
 dist/
-settings.py
+instance/settings.py
+instance/development.py
+instance/production.py
+instance/testing.py
+error.log

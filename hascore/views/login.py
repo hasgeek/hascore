@@ -2,15 +2,9 @@
 
 import os
 from flask import g, send_from_directory, Response, redirect, get_flashed_messages, flash
-from flaskext.lastuser import LastUser
-from flaskext.lastuser.sqlalchemy import UserManager
 from coaster.views import get_next_url
 
-from hascore import app
-from hascore.models import db, User
-
-lastuser = LastUser(app)
-lastuser.init_usermanager(UserManager(db, User))
+from hascore import app, lastuser
 
 
 @app.route('/')
@@ -47,7 +41,6 @@ def logout():
 @lastuser.auth_handler
 def lastuserauth():
     # Save the user object
-    db.session.commit()
     return redirect(get_next_url())
 
 
