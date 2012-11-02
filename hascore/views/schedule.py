@@ -1,4 +1,5 @@
 from datetime import datetime, date
+from flask import request
 from coaster.views import jsonp
 from hascore import app
 
@@ -9,11 +10,13 @@ def events_list():
     List all upcoming events.
     """
     return jsonp({
-        'profiles': [{
-            'name': 'droidconin',
-            'title': 'Droidcon India',
-            'buid': 'off7nXRQQ7-S1ZK-D_tIdQ',
-            }],
+        'profiles': {
+            'off7nXRQQ7-S1ZK-D_tIdQ': {
+                'name': 'droidconin',
+                'title': 'Droidcon India',
+                'buid': 'off7nXRQQ7-S1ZK-D_tIdQ',
+                },
+            },
         'workspaces': [{
             'profile_id': 'off7nXRQQ7-S1ZK-D_tIdQ',
             'name': '2012',
@@ -33,8 +36,8 @@ def events_list():
                     'date_location': '2 & 3 November, Bangalore',
                     'start_date': date(2012, 11, 2).isoformat(),
                     'end_date': date(2012, 11, 3).isoformat(),
-                    'start': None,
-                    'end': None,
+                    'start': datetime(2012, 11, 2, 3, 30, 0).isoformat() + 'Z',
+                    'end': datetime(2012, 11, 3, 12, 30, 0).isoformat() + 'Z',
                     }
                 }
             }]
@@ -46,4 +49,11 @@ def eventeditions_list():
     """
     List schedules for requested event.
     """
-    pass
+    event = request.args.get('event')
+    if not event:
+        return jsonp(status='error', error='no-event-specified', description="Specify an event with the 'event' parameter")
+    if event != 'droidconin/2012':
+        return jsonp(status='error', error='unknown-event', description="No such event. Use profile/workspace syntax")
+
+    # Return static data for Droidcon
+    return jsonp()
