@@ -100,20 +100,37 @@ def schedule_list(profile, workspace):
             },
         'profiles': {
             'off7nXRQQ7-S1ZK-D_tIdQ': {
+                'buid': 'off7nXRQQ7-S1ZK-D_tIdQ',
                 'name': 'droidconin',
                 'title': 'Droidcon India',
-                'buid': 'off7nXRQQ7-S1ZK-D_tIdQ',
                 },
+            '4e9kRtq1RGGIkwQP2tYEjg': {
+                'buid': '4e9kRtq1RGGIkwQP2tYEjg',
+                'name': '4e9kRtq1RGGIkwQP2tYEjg',
+                'title': 'Aravind Krishnaswamy',
+                }
             },
         'workspaces': {
             'Mg8vrAAlSIanvE3qsZu2Dg': {
-                'profile_id': 'off7nXRQQ7-S1ZK-D_tIdQ',
                 'buid': 'Mg8vrAAlSIanvE3qsZu2Dg',
+                'profile_id': 'off7nXRQQ7-S1ZK-D_tIdQ',
                 'name': '2012',
                 'title': 'Droidcon India 2012',
                 'short_title': '2012',
+                'timezone': 'Asia/Kolkata',
                 'venues': ['avi14aHLQruydl9b_03ORA'],
                 'sessions': [
+                    {
+                        'name': '596-about-droidcon-2012',
+                        'title': 'About Droidcon 2012',
+                        'description': None,
+                        'room': 'eXUTAdkvSEe0b2BL0tVWZw',
+                        'speakers': ['4e9kRtq1RGGIkwQP2tYEjg'],
+                        'type': 'Panel',
+                        'level': 'Beginner',
+                        'start': datetime(2012, 11, 2, 4, 30, 0).isoformat() + 'Z',
+                        'end': datetime(2012, 11, 2, 5, 0, 0).isoformat() + 'Z',
+                        }
                     ]
                 },
             },
