@@ -1,6 +1,5 @@
 from datetime import datetime, date
-from flask import request
-from coaster.views import jsonp
+from coaster.views import jsonp, requestargs
 from hascore import app
 
 
@@ -44,16 +43,27 @@ def events_list():
         })
 
 
-@app.route('/1/schedules/get')
-def eventeditions_list():
+@app.route('/1/schedules/get_by_name')
+@requestargs('event')
+def schedule_by_name(event):
     """
     List schedules for requested event.
     """
-    event = request.args.get('event')
-    if not event:
-        return jsonp(status='error', error='no-event-specified', description="Specify an event with the 'event' parameter")
     if event != 'droidconin/2012':
         return jsonp(status='error', error='unknown-event', description="No such event. Use profile/workspace syntax")
 
     # Return static data for Droidcon
+    return schedule_list(profile='off7nXRQQ7-S1ZK-D_tIdQ', workspace='Mg8vrAAlSIanvE3qsZu2Dg')
+
+
+@app.route('/1/schedules/get')
+@requestargs('profile', 'workspace')
+def schedule_list(profile, workspace):
+    """
+    List schedules for requested profile/workspace
+    """
+    if profile != 'off7nXRQQ7-S1ZK-D_tIdQ':
+        return jsonp(status='error', error='unknown-profile', description="No such profile. Use the buid")
+    if workspace != 'Mg8vrAAlSIanvE3qsZu2Dg':
+        return jsonp(status='error', error='unknown-workspace', description="No such workspace. Use the buid")
     return jsonp()
