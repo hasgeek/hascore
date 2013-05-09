@@ -2,17 +2,31 @@
 
 (function(){
 
-  var ss1 = document.createElement("link");
-  ss1.type = "text/css";
-  ss1.rel = "stylesheet";
-  ss1.href = "{{ url_for('baseframe.static', filename='css/networkbar.css', _external=True) }}";
-  document.getElementsByTagName("head")[0].appendChild(ss1);
+  var head = document.getElementsByTagName('head')[0],
+      css = '#hg-bar { display: none; }',
+      style = document.createElement('style'),
+      sl1 = document.createElement("link"),
+      sl2 = document.createElement("link");
 
-  var ss2 = document.createElement("link");
-  ss2.type = "text/css";
-  ss2.rel = "stylesheet";
-  ss2.href = "//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600;"
-  document.getElementsByTagName("head")[0].appendChild(ss2);
+  style.type = 'text/css';
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+  head.appendChild(style);
+
+  sl1.type = "text/css";
+  sl1.rel = "stylesheet";
+  // sl1.href = "{{ url_for('baseframe.static', filename='css/networkbar.css', _external=True) }}";
+  sl1.href = "{{ request.url_root[:-1] }}{% assets 'css_all' %}{{ ASSET_URL }}{% endassets %}";
+  head.appendChild(sl1);
+
+  sl2.type = "text/css";
+  sl2.rel = "stylesheet";
+  sl2.href = "//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600;"
+  head.appendChild(sl2);
   
   var container = document.getElementById('networkbar');
   if (container === null) {

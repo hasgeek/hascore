@@ -20,6 +20,6 @@ import hascore.views
 # Configure the app
 def init_for(env):
     coaster.app.init_app(app, env)
-    baseframe.init_app(app, requires=['baseframe'])
+    baseframe.init_app(app, requires=['baseframe-networkbar'])
     lastuser.init_app(app)
     lastuser.init_usermanager(UserManager(hascore.models.db, hascore.models.User))

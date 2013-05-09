@@ -15,3 +15,5 @@ instance/development.py
 instance/production.py
 instance/testing.py
 error.log
+.webassets-cache
+baseframe-packed.*
