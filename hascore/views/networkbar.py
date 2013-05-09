@@ -10,4 +10,5 @@ def networkbar_js():
     """
     Return networkbar as a JS resource.
     """
-    return render_template('networkbar.js'), 200, [('Content-Type', 'text/javascript; charset=utf-8')]
+    return render_template('networkbar.js'), 200, [
+        ('Content-Type', 'text/javascript; charset=utf-8')]
