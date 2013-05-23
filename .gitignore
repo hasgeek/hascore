@@ -17,3 +17,4 @@ instance/testing.py
 error.log
 .webassets-cache
 baseframe-packed.*
+baseframe-networkbar.*

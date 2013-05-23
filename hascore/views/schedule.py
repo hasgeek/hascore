@@ -1,7 +1,7 @@
 from datetime import datetime, date
 from flask import url_for
 from coaster.views import jsonp, requestargs
-from hascore import app
+from .. import app
 
 
 @app.route('/1/events/get')

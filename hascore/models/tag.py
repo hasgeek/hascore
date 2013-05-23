@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from coaster import make_name
-from hascore.models import db, BaseMixin
+from . import db, BaseMixin
 
 __all__ = ['Tag']
 

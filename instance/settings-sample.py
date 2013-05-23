@@ -5,7 +5,7 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
 #: Secret key
 SECRET_KEY = 'make this something random'
 #: Timezone
-TIMEZONE = 'Asia/Calcutta'
+TIMEZONE = 'Asia/Kolkata'
 #: LastUser server
 LASTUSER_SERVER = 'https://auth.hasgeek.com/'
 #: LastUser client id
@@ -23,8 +23,8 @@ LASTUSER_CLIENT_SECRET = ''
 #: DEFAULT_MAIL_SENDER : default None
 MAIL_FAIL_SILENTLY = False
 MAIL_SERVER = 'localhost'
-DEFAULT_MAIL_SENDER = ('Bill Gate', 'test@example.com')
+DEFAULT_MAIL_SENDER = ('Hascore', 'test@example.com')
 #: Logging: recipients of error emails
-ADMINS=[]
+ADMINS = []
 #: Log file
-LOGFILE='error.log'
+LOGFILE = 'error.log'

@@ -2,7 +2,7 @@
 
 from flask import g
 from flask.ext.lastuser.sqlalchemy import UserBase
-from hascore.models import db
+from . import db
 
 __all__ = ['User']
 

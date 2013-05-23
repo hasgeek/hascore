@@ -4,7 +4,7 @@ import os
 from flask import g, send_from_directory, Response, redirect, get_flashed_messages, flash
 from coaster.views import get_next_url
 
-from hascore import app, lastuser
+from .. import app, lastuser
 
 
 @app.route('/')

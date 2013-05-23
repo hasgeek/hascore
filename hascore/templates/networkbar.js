@@ -23,7 +23,7 @@
 
   sl2.type = "text/css";
   sl2.rel = "stylesheet";
-  sl2.href = "{{ request.url_root[:-1] }}{% assets 'css_all' %}{{ ASSET_URL }}{% endassets %}";
+  sl2.href = "{{ request.url_root[:-1] }}{% assets 'css_networkbar' %}{{ ASSET_URL }}{% endassets %}";
   head.appendChild(sl2);
 
   var container = document.getElementById('networkbar');
