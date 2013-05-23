@@ -18,10 +18,13 @@ from . import models, views
 
 
 # Configure the app
-def init_for(env):
+def init_for(env, createdb=False):
     coaster.app.init_app(app, env)
     # This is required before baseframe init:
+    if createdb:
+        models.db.create_all()
     app.config['NETWORKBAR_DATA'] = models.networkbar_data()
+
     baseframe.init_app(app, requires=[])
     lastuser.init_app(app)
     lastuser.init_usermanager(UserManager(models.db, models.User))
