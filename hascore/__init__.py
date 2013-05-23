@@ -14,16 +14,17 @@ lastuser = Lastuser()
 
 # Second, import the models and views
 
-import hascore.models
-import hascore.views
+from . import models, views
 
 
 # Configure the app
 def init_for(env):
     coaster.app.init_app(app, env)
+    # This is required before baseframe init:
+    app.config['NETWORKBAR_DATA'] = models.networkbar_data()
     baseframe.init_app(app, requires=[])
     lastuser.init_app(app)
-    lastuser.init_usermanager(UserManager(hascore.models.db, hascore.models.User))
+    lastuser.init_usermanager(UserManager(models.db, models.User))
     app.assets.register('js_networkbar',
         Bundle(assets.require('baseframe-networkbar.js'),
             filters='closure_js', output='js/baseframe-networkbar.js'))
