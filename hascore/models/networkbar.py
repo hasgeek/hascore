@@ -30,4 +30,6 @@ def dictify_networklink(link):
 
 
 def networkbar_data():
-    return dict(links=[dictify_networklink(l) for l in NetworkLink.query.all() if l.parent is None])
+    # Load all links into SQLAlchemy identity map but loop through just the top-level.
+    # Subitems will be retrieved from the identity map without additional queries.
+    return [dictify_networklink(l) for l in NetworkLink.query.all() if l.parent is None]

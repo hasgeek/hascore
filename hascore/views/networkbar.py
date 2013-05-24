@@ -20,5 +20,4 @@ def networkbar_json():
     """
     Return networkbar data.
     """
-    # Load all links into SQLAlchemy identity map but loop through just the top-level
-    return jsonp(networkbar_data())
+    return jsonp(links=networkbar_data())
