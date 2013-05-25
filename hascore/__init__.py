@@ -25,7 +25,7 @@ def init_for(env, createdb=False):
         models.db.create_all()
     app.config['NETWORKBAR_DATA'] = models.networkbar_data()
 
-    baseframe.init_app(app, requires=[])
+    baseframe.init_app(app, requires=['baseframe'])
     lastuser.init_app(app)
     lastuser.init_usermanager(UserManager(models.db, models.User))
     app.assets.register('js_networkbar',
