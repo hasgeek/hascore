@@ -35,7 +35,7 @@
 
   var siteid = container.getAttribute('data-siteid');
   if (siteid) {
-    var menuelement = document.querySelector('#hg-bar [data-siteid="' + siteid + '"]');
+    var menuelement = document.querySelector('#hg-bar [id="hg-networkbar-' + siteid + '"]');
     if (menuelement !== null) {
       menuelement.className = menuelement.className + " selected";
     }
