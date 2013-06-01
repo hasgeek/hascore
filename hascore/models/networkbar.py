@@ -19,6 +19,10 @@ class NetworkLink(BaseNameMixin, db.Model):
     parent = db.relationship('NetworkLink', remote_side='NetworkLink.id',
         backref=db.backref('children', order_by=seq))
 
+    def __repr__(self):
+        return u'<NetworkLink {seq} {name} "{title}">'.format(
+            seq=self.seq, name=self.name, title=self.title)
+
 
 def dictify_networklink(link):
     return {'name': link.name,
