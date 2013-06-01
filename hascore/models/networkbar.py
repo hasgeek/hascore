@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from sqlalchemy.ext.orderinglist import ordering_list
 from . import db, BaseNameMixin
 
 __all__ = ['NetworkLink', 'networkbar_data']
@@ -17,7 +18,7 @@ class NetworkLink(BaseNameMixin, db.Model):
     #: Parent for submenus
     parent_id = db.Column(None, db.ForeignKey('networklink.id'), nullable=True)
     parent = db.relationship('NetworkLink', remote_side='NetworkLink.id',
-        backref=db.backref('children', order_by=seq))
+        backref=db.backref('children', order_by=seq, collection_class=ordering_list('seq')))
 
     def __repr__(self):
         return u'<NetworkLink {seq} {name} "{title}">'.format(
