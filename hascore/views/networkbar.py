@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import render_template
+from baseframe import networkbar_cache
 from coaster.views import jsonp
 from .. import app
 from ..models import networkbar_data
@@ -21,3 +22,8 @@ def networkbar_json():
     Return networkbar data.
     """
     return jsonp(links=networkbar_data())
+
+
+def cache_networkbar_links():
+    networkbar_cache.delete('networkbar-links')
+    app.config['NETWORKBAR_LINKS'] = networkbar_data()

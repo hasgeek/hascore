@@ -23,7 +23,6 @@ def init_for(env, createdb=False):
     # This is required before baseframe init:
     if createdb:
         models.db.create_all()
-    app.config['NETWORKBAR_DATA'] = models.networkbar_data()
 
     baseframe.init_app(app, requires=['baseframe'])
     lastuser.init_app(app)
@@ -34,3 +33,6 @@ def init_for(env, createdb=False):
     app.assets.register('css_networkbar',
         Bundle(assets.require('baseframe-networkbar.css'),
             filters='cssmin', output='css/baseframe-networkbar.css'))
+
+    with app.test_request_context():
+        views.networkbar.cache_networkbar_links()

@@ -2,6 +2,8 @@
 
 #: Database backend
 SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
+#: Cache type
+CACHE_TYPE = 'redis'
 #: Secret key
 SECRET_KEY = 'make this something random'
 #: Timezone
