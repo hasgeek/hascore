@@ -2,6 +2,7 @@
 
 from flask import Flask
 from flask.ext.assets import Bundle
+from flask.ext.admin import Admin
 from flask.ext.lastuser import Lastuser
 from flask.ext.lastuser.sqlalchemy import UserManager
 from baseframe import baseframe, assets
@@ -11,6 +12,7 @@ import coaster.app
 
 app = Flask(__name__, instance_relative_config=True)
 lastuser = Lastuser()
+admin = Admin(app, name="Hascore")
 
 # Second, import the models and views
 
@@ -33,6 +35,8 @@ def init_for(env, createdb=False):
     app.assets.register('css_networkbar',
         Bundle(assets.require('baseframe-networkbar.css'),
             filters='cssmin', output='css/baseframe-networkbar.css'))
+
+    views.admin.init_admin(admin)
 
     with app.test_request_context():
         views.networkbar.cache_networkbar_links()

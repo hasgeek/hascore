@@ -5,6 +5,7 @@ from flask import g, send_from_directory, Response, redirect, get_flashed_messag
 from coaster.views import get_next_url
 
 from .. import app, lastuser
+from ..models import db
 
 
 @app.route('/')
@@ -42,6 +43,12 @@ def logout():
 def lastuserauth():
     # Save the user object
     return redirect(get_next_url())
+
+
+@app.route('/login/notify', methods=['POST'])
+@lastuser.notification_handler
+def lastusernotify(user):
+    db.session.commit()
 
 
 @lastuser.auth_error_handler
