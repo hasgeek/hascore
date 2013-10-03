@@ -18,7 +18,7 @@
 
   sl1.type = "text/css";
   sl1.rel = "stylesheet";
-  sl1.href = "//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600";
+  sl1.href = "//fonts.googleapis.com/css?family=Source+Sans+Pro:400,600";
   head.appendChild(sl1);
 
   sl2.type = "text/css";
