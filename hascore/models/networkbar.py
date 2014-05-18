@@ -24,6 +24,10 @@ class NetworkLink(BaseNameMixin, db.Model):
         return u'<NetworkLink {seq} {name} "{title}">'.format(
             seq=self.seq, name=self.name, title=self.title)
 
+    @classmethod
+    def get(cls, name):
+        return cls.query.filter_by(name=name).one_or_none()
+
 
 def dictify_networklink(link):
     return {'name': link.name,
