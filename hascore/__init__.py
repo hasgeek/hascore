@@ -17,6 +17,7 @@ admin = Admin(app, name="Hascore")
 # Second, import the models and views
 
 from . import models, views
+from .models import db
 
 
 # Configure the app

@@ -2,5 +2,9 @@ Flask
 Flask-SQLAlchemy
 Flask-Lastuser
 Flask-Admin
+Flask-Script==0.5.3
+Flask-RQ
 coaster
 baseframe
+SQLAlchemy>=0.9
+progressbar2

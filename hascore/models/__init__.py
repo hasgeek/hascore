@@ -7,5 +7,5 @@ from coaster.sqlalchemy import IdMixin, TimestampMixin, BaseMixin, BaseNameMixin
 db = SQLAlchemy(app)
 
 from .user import *
-from .tag import *
 from .networkbar import *
+from .geoname import *
