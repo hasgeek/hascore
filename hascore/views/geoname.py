@@ -22,3 +22,13 @@ def geo_get_by_name(name):
 @cache.memoize(timeout=86400)
 def geo_get_by_title(title, lang=None):
     return jsonp({'status': 'ok', 'result': [g.as_dict() for g in GeoName.get_by_title(title, lang)]})
+
+
+@app.route('/1/geo/parse_locations')
+@requestargs('q', 'special[]' 'lang', 'bias[]')
+def geo_parse_location(q, special=[], lang=None, bias=[]):
+    result = GeoName.parse_locations(q, special, lang, bias)
+    for item in result:
+        if 'geoname' in item:
+                item['geoname'] = item['geoname'].as_dict()
+    return jsonp({'status': 'ok', 'result': result})

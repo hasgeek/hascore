@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 from sqlalchemy.dialects.postgresql import ARRAY
 from coaster.utils import make_name
 from . import db, BaseMixin, BaseNameMixin
@@ -7,6 +8,10 @@ from . import db, BaseMixin, BaseNameMixin
 # from sqlalchemy.sql import func
 
 __all__ = ['GeoName', 'GeoCountryInfo', 'GeoAdmin1Code', 'GeoAdmin2Code', 'GeoAltName']
+
+
+NOWORDS_RE = re.compile(r'(\W+)', re.UNICODE)
+WORDS_RE = re.compile(r'\w+', re.UNICODE)
 
 
 class GeoCountryInfo(BaseNameMixin, db.Model):
@@ -187,6 +192,67 @@ class GeoName(BaseNameMixin, db.Model):
         return sorted(list(results), key=lambda g: ({'A': 1, 'P': 2}.get(g.fclass, 0), g.population), reverse=True)
 
 
+    @classmethod
+    def parse_locations(cls, q, special=[], lang=None, bias=[]):
+        """
+        Parse a string and return annotations marking all identified locations in the string.
+        If a list of special tokens is provided, these are marked in the annotations as well.
+        If a lang is provided, only locations with names in that language are considered.
+        If a country bias is provided (as two letter uppercase country code), results from that
+        country are prioritised.
+        """
+        filtlike = lambda q: q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
+        tokens = NOWORDS_RE.split(q)
+        while '' in tokens:
+            tokens.remove('')  # Remove blank tokens from beginning and end
+        ltokens = [t.lower() for t in tokens]
+        results = []
+        counter = 0
+        limit = len(tokens)
+        while counter < limit:
+            token = tokens[counter]
+            # Do a case-insensitive match
+            ltoken = token.lower()
+            # Ignore punctuation, only query for tokens containing text
+            # Special-case 'or' and 'in' to prevent matching against Oregon and Indiana, USA.
+            if ltoken not in ('or', 'in') and WORDS_RE.match(token):
+                # Find a GeoAltName matching token, add GeoAltName.geoname to results
+                if lang:
+                    matches = GeoAltName.query.filter(
+                        GeoAltName.title.ilike(filtlike(ltoken)),
+                        db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).all()
+                else:
+                    matches = GeoAltName.query.filter(
+                        GeoAltName.title.ilike(filtlike(ltoken))).all()
+                if not matches:
+                    # This token didn't match anything, move on
+                    results.append({'token': token})
+                else:
+                    # Now filter through the matches to see if there are exact matches
+                    candidates = [(NOWORDS_RE.split(m.title.lower()), m) for m in matches]
+                    fullmatch = []
+                    for mtokens, match in candidates:
+                        if mtokens == ltokens[counter:counter+len(mtokens)]:
+                            fullmatch.append((len(mtokens), match))
+                    if fullmatch:
+                        maxmatch = max(f[0] for f in fullmatch)
+                        accepted = list(set([f[1].geoname for f in fullmatch if f[0] == maxmatch]))
+                        # Filter accepted down to one match. Sort by (a) bias, (b) city over state and (c) population
+                        accepted.sort(
+                            key=lambda g: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(g.country_id, -1),
+                                {'A': 1, 'P': 2}.get(g.fclass, 0),
+                                g.population), reverse=True)
+                        results.append({'token': ''.join(tokens[counter:counter+maxmatch]), 'geoname': accepted[0]})
+                        counter += maxmatch - 1
+                    else:
+                        results.append({'token': token})
+            else:
+                results.append({'token': token})
+
+            counter += 1
+        return results
+
+
 class GeoAltName(BaseMixin, db.Model):
     __tablename__ = 'geo_alt_name'
 
@@ -198,6 +264,9 @@ class GeoAltName(BaseMixin, db.Model):
     is_short_name = db.Column(db.Boolean, nullable=False)
     is_colloquial = db.Column(db.Boolean, nullable=False)
     is_historic = db.Column(db.Boolean, nullable=False)
+
+    def __repr__(self):
+        return '<GeoAltName %s "%s" of %s>' % (self.lang, self.title, repr(self.geoname)[1:-1] if self.geoname else None)
 
 
 class GeoAdmin1Code(BaseMixin, db.Model):
