@@ -236,13 +236,15 @@ class GeoName(BaseNameMixin, db.Model):
                             fullmatch.append((len(mtokens), match))
                     if fullmatch:
                         maxmatch = max(f[0] for f in fullmatch)
-                        accepted = list(set([f[1].geoname for f in fullmatch if f[0] == maxmatch]))
-                        # Filter accepted down to one match. Sort by (a) bias, (b) city over state and (c) population
+                        accepted = list(set([f[1] for f in fullmatch if f[0] == maxmatch]))
+                        # Filter accepted down to one match.
+                        # Sort by (a) bias, (b) language match, (c) city over state and (d) population
                         accepted.sort(
-                            key=lambda g: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(g.country_id, -1),
-                                {'A': 1, 'P': 2}.get(g.fclass, 0),
-                                g.population), reverse=True)
-                        results.append({'token': ''.join(tokens[counter:counter+maxmatch]), 'geoname': accepted[0]})
+                            key=lambda a: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(a.geoname.country_id, -1),
+                                {lang: 0}.get(a.lang, 1),
+                                {'A': 1, 'P': 2}.get(a.geoname.fclass, 0),
+                                a.geoname.population), reverse=True)
+                        results.append({'token': ''.join(tokens[counter:counter+maxmatch]), 'geoname': accepted[0].geoname})
                         counter += maxmatch - 1
                     else:
                         results.append({'token': token})
