@@ -5,7 +5,7 @@ from coaster.views import jsonp, requestargs
 from .. import app
 
 
-@app.route('/1/nlp/tag', methods=['POST'])
+@app.route('/1/nlp/tag', methods=['GET', 'POST'])
 @requestargs('text', 'lang')
 def nlp_extract_tags(text, lang=None):
     """
