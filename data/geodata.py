@@ -244,11 +244,11 @@ def load_admin2_codes(fd):
 
 def main(env):
     init_for(env)
-    # load_country_info(open('countryInfo.txt'))
+    load_country_info(open('countryInfo.txt'))
     # load_geonames(open('allCountries.txt'))
     # load_admin1_codes(open('admin1CodesASCII.txt'))
     # load_admin2_codes(open('admin2Codes.txt'))
-    load_alt_names(open('alternateNames.txt'))
+    #load_alt_names(open('alternateNames.txt'))
 
 
 if __name__ == '__main__':

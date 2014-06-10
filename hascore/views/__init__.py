@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from . import login, networkbar, schedule, admin, geoname
+from . import login, networkbar, schedule, admin, geoname, nlp
