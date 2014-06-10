@@ -8,3 +8,5 @@ coaster
 baseframe
 SQLAlchemy>=0.9
 progressbar2
+nltk
+numpy
