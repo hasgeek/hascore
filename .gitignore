@@ -25,3 +25,4 @@ packed.js
 error.log
 data/*.txt
 data/*.csv
+data/*.zip

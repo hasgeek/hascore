@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
+
+# Make hascore importable by adding the parent dir to the path
+sys.path.append(os.path.dirname(os.getcwd()))
+
 from collections import namedtuple
+from urlparse import urljoin
+import zipfile
 import unicodecsv
+import requests
 from decimal import Decimal
 from datetime import datetime
 from progressbar import ProgressBar
@@ -38,7 +46,32 @@ def get_progressbar():
         widgets=[progressbar.widgets.Percentage(), ' ', progressbar.widgets.Bar(), ' ', progressbar.widgets.ETA(), ' '])
 
 
+def downloadfile(basepath, filename):
+    print "Downloading %s..." % filename
+    url = urljoin(basepath, filename)
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        progress = ProgressBar(maxval=int(r.headers.get('content-length', 0)),
+            widgets=[progressbar.widgets.Percentage(), ' ',
+                progressbar.widgets.Bar(), ' ',
+                progressbar.widgets.ETA(), ' ']).start()
+        bytes = 0
+        with open(filename, 'wb') as f:
+            for chunk in r.iter_content(1024):
+                if not chunk:
+                    break  # Break when done. The connection remains open for Keep-Alive
+                bytes += len(chunk)
+                f.write(chunk)
+                progress.update(bytes)
+        progress.finish()
+
+        if filename.lower().endswith('.zip'):
+            zip = zipfile.ZipFile(filename, 'r')
+            zip.extractall()
+
+
 def load_country_info(fd):
+    print "Loading country info..."
     progress = get_progressbar()
     countryinfo = [CountryInfoRecord(*row) for row in unicodecsv.reader(fd, delimiter='\t')
         if not row[0].startswith('#')]
@@ -78,7 +111,7 @@ def load_country_info(fd):
 
 def load_geonames(fd):
     progress = get_progressbar()
-    print "Loading..."
+    print "Loading geonames..."
     size = sum(1 for line in fd)
     fd.seek(0)  # Return to start
     loadprogress = ProgressBar(maxval=size,
@@ -203,6 +236,7 @@ def load_alt_names(fd):
 
 
 def load_admin1_codes(fd):
+    print "Loading admin1 codes..."
     progress = get_progressbar()
     admincodes = [GeoAdminRecord(*row) for row in unicodecsv.reader(fd, delimiter='\t')
         if not row[0].startswith('#')]
@@ -223,6 +257,7 @@ def load_admin1_codes(fd):
 
 
 def load_admin2_codes(fd):
+    print "Loading admin2 codes..."
     progress = get_progressbar()
     admincodes = [GeoAdminRecord(*row) for row in unicodecsv.reader(fd, delimiter='\t')
         if not row[0].startswith('#')]
@@ -244,11 +279,17 @@ def load_admin2_codes(fd):
 
 def main(env):
     init_for(env)
+    for filename in [
+            'countryInfo.txt', 'IN.zip', 'allCountries.zip', 'admin1CodesASCII.txt',
+            'admin2Codes.txt', 'alternateNames.zip']:
+        downloadfile('http://download.geonames.org/export/dump/', filename)
+
     load_country_info(open('countryInfo.txt'))
-    # load_geonames(open('allCountries.txt'))
-    # load_admin1_codes(open('admin1CodesASCII.txt'))
-    # load_admin2_codes(open('admin2Codes.txt'))
-    #load_alt_names(open('alternateNames.txt'))
+    load_geonames(open('IN.txt'))
+    load_geonames(open('allCountries.txt'))
+    load_admin1_codes(open('admin1CodesASCII.txt'))
+    load_admin2_codes(open('admin2Codes.txt'))
+    load_alt_names(open('alternateNames.txt'))
 
 
 if __name__ == '__main__':
