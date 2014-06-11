@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 import os
 
 # Make hascore importable by adding the parent dir to the path
