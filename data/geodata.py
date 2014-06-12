@@ -200,7 +200,7 @@ def load_geonames(fd):
 
 def load_alt_names(fd):
     progress = get_progressbar()
-    print "Loading..."
+    print "Loading alternate names..."
     size = sum(1 for line in fd)
     fd.seek(0)  # Return to start
     loadprogress = ProgressBar(maxval=size,

@@ -215,7 +215,7 @@ class GeoName(BaseNameMixin, db.Model):
             ltoken = token.lower()
             # Ignore punctuation, only query for tokens containing text
             # Special-case 'or' and 'in' to prevent matching against Oregon and Indiana, USA.
-            if ltoken not in ('or', 'in') and WORDS_RE.match(token):
+            if ltoken not in ('or', 'in', 'to', 'the') and WORDS_RE.match(token):
                 # Find a GeoAltName matching token, add GeoAltName.geoname to results
                 if lang:
                     matches = GeoAltName.query.filter(
