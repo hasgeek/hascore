@@ -118,9 +118,9 @@ class GeoName(BaseNameMixin, db.Model):
 
             if self.id:
                 checkused = lambda c: bool(c in reserved or
-                    GeoName.query.filter(GeoName.id != self.id).filter_by(name=c).count())
+                    GeoName.query.filter(GeoName.id != self.id).filter_by(name=c).notempty())
             else:
-                checkused = lambda c: bool(c in reserved or GeoName.query.filter_by(name=c).count())
+                checkused = lambda c: bool(c in reserved or GeoName.query.filter_by(name=c).notempty())
             self.name = unicode(make_name(usetitle, maxlength=250, checkused=checkused))
 
     def __repr__(self):
