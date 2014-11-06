@@ -2,10 +2,10 @@
 
 import re
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import joinedload
+from sqlalchemy import DDL, event
 from coaster.utils import make_name
 from . import db, BaseMixin, BaseNameMixin
-# from sqlalchemy.ext.declarative import declared_attr
-# from sqlalchemy.sql import func
 
 __all__ = ['GeoName', 'GeoCountryInfo', 'GeoAdmin1Code', 'GeoAdmin2Code', 'GeoAltName']
 
@@ -39,12 +39,6 @@ class GeoCountryInfo(BaseNameMixin, db.Model):
     neighbours = db.Column(ARRAY(db.CHAR(2), dimensions=1))
     equivalent_fips_code = db.Column(db.Unicode(3))
 
-    # @declared_attr
-    # def __table_args__(cls):
-    #     return (db.Index('ix_geo_country_info_title',
-    #         func.to_tsvector("english", cls.title),
-    #         postgresql_using='gin'),)
-
     def __repr__(self):
         return '<GeoCountryInfo %d "%s">' % (self.geonameid, self.title)
 
@@ -77,16 +71,6 @@ class GeoName(BaseNameMixin, db.Model):
     dem = db.Column(db.Integer)  # Digital Elevation Model
     timezone = db.Column(db.Unicode(40))
     moddate = db.Column(db.Date)
-
-    # @declared_attr
-    # def __table_args__(cls):
-    #     return (
-    #         db.Index('ix_geo_name_title',
-    #             func.to_tsvector("english", cls.title),
-    #             postgresql_using='gin'),
-    #         db.Index('ix_geo_name_ascii_title',
-    #             func.to_tsvector("english", cls.ascii_title),
-    #             postgresql_using='gin'),
 
     @property
     def short_title(self):
@@ -220,11 +204,17 @@ class GeoName(BaseNameMixin, db.Model):
                 # Find a GeoAltName matching token, add GeoAltName.geoname to results
                 if lang:
                     matches = GeoAltName.query.filter(
-                        GeoAltName.title.ilike(filtlike(ltoken)),
-                        db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).all()
+                        db.func.lower(GeoAltName.title).like(filtlike(ltoken)),
+                        db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).options(
+                            joinedload('geoname').joinedload('country'),
+                            joinedload('geoname').joinedload('admin1code'),
+                            joinedload('geoname').joinedload('admin2code')).all()
                 else:
                     matches = GeoAltName.query.filter(
-                        GeoAltName.title.ilike(filtlike(ltoken))).all()
+                        db.func.lower(GeoAltName.title).like(filtlike(ltoken))).options(
+                            joinedload('geoname').joinedload('country'),
+                            joinedload('geoname').joinedload('admin1code'),
+                            joinedload('geoname').joinedload('admin2code')).all()
                 if not matches:
                     # This token didn't match anything, move on
                     results.append({'token': token})
@@ -261,7 +251,7 @@ class GeoAltName(BaseMixin, db.Model):
 
     geonameid = db.Column(None, db.ForeignKey('geo_name.id'), nullable=False)
     geoname = db.relationship(GeoName, backref=db.backref('alternate_titles', cascade='all, delete-orphan'))
-    lang = db.Column(db.Unicode(7), nullable=True)
+    lang = db.Column(db.Unicode(7), nullable=True, index=True)
     title = db.Column(db.Unicode(200), nullable=False)
     is_preferred_name = db.Column(db.Boolean, nullable=False)
     is_short_name = db.Column(db.Boolean, nullable=False)
@@ -305,3 +295,20 @@ class GeoAdmin2Code(BaseMixin, db.Model):
 
     def __repr__(self):
         return '<GeoAdmin2Code %d "%s">' % (self.geonameid, self.ascii_title)
+
+
+create_geo_country_info_index = DDL(
+    "CREATE INDEX ix_geo_country_info_title ON geo_country_info (lower(title) text_pattern_ops);")
+event.listen(GeoCountryInfo.__table__, 'after_create',
+    create_geo_country_info_index.execute_if(dialect='postgresql'))
+
+create_geo_name_index = DDL(
+    "CREATE INDEX ix_geo_name_title ON geo_name (lower(title) text_pattern_ops); "
+    "CREATE INDEX ix_geo_name_ascii_title ON geo_name (lower(ascii_title) text_pattern_ops);")
+event.listen(GeoName.__table__, 'after_create',
+    create_geo_name_index.execute_if(dialect='postgresql'))
+
+create_geo_alt_name_index = DDL(
+    "CREATE INDEX ix_geo_alt_name_title ON geo_alt_name (lower(title) text_pattern_ops);")
+event.listen(GeoAltName.__table__, 'after_create',
+    create_geo_alt_name_index.execute_if(dialect='postgresql'))
