@@ -133,6 +133,7 @@ def load_geonames(fd):
                     ['L', 'RGNE'],
                     ['A', 'ADM1'],
                     ['A', 'ADM2'],
+                    ['A', 'ADM3'],
                     ['A', 'PCL'],
                     ['A', 'PCLD'],
                     ['A', 'PCLF'],

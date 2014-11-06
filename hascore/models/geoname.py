@@ -121,7 +121,8 @@ class GeoName(BaseNameMixin, db.Model):
                     GeoName.query.filter(GeoName.id != self.id).filter_by(name=c).notempty())
             else:
                 checkused = lambda c: bool(c in reserved or GeoName.query.filter_by(name=c).notempty())
-            self.name = unicode(make_name(usetitle, maxlength=250, checkused=checkused))
+            with db.session.no_autoflush:
+                self.name = unicode(make_name(usetitle, maxlength=250, checkused=checkused))
 
     def __repr__(self):
         return '<GeoName %d %s %s %s "%s">' % (self.geonameid, self.country_id, self.fclass, self.fcode, self.ascii_title)
