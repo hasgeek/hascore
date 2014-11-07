@@ -13,6 +13,16 @@ __all__ = ['GeoName', 'GeoCountryInfo', 'GeoAdmin1Code', 'GeoAdmin2Code', 'GeoAl
 NOWORDS_RE = re.compile(r'(\W+)', re.UNICODE)
 WORDS_RE = re.compile(r'\w+', re.UNICODE)
 
+continent_codes = {
+    'AF': 6255146,
+    'AS': 6255147,
+    'EU': 6255148,
+    'NA': 6255149,
+    'OC': 6255151,
+    'SA': 6255150,
+    'AN': 6255152,
+    }
+
 
 class GeoCountryInfo(BaseNameMixin, db.Model):
     __tablename__ = 'geo_country_info'
@@ -43,6 +53,41 @@ class GeoCountryInfo(BaseNameMixin, db.Model):
         return '<GeoCountryInfo %d "%s">' % (self.geonameid, self.title)
 
 
+class GeoAdmin1Code(BaseMixin, db.Model):
+    __tablename__ = 'geo_admin1_code'
+
+    geonameid = db.synonym('id')
+    geoname = db.relationship('GeoName', uselist=False,
+        primaryjoin='GeoAdmin1Code.id == foreign(GeoName.id)',
+        backref='has_admin1code')
+    title = db.Column(db.Unicode(200))
+    ascii_title = db.Column(db.Unicode(200))
+    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
+    country = db.relationship('GeoCountryInfo')
+    admin1_code = db.Column(db.Unicode(7))
+
+    def __repr__(self):
+        return '<GeoAdmin1Code %d "%s">' % (self.geonameid, self.ascii_title)
+
+
+class GeoAdmin2Code(BaseMixin, db.Model):
+    __tablename__ = 'geo_admin2_code'
+
+    geonameid = db.synonym('id')
+    geoname = db.relationship('GeoName', uselist=False,
+        primaryjoin='GeoAdmin2Code.id == foreign(GeoName.id)',
+        backref='has_admin2code')
+    title = db.Column(db.Unicode(200))
+    ascii_title = db.Column(db.Unicode(200))
+    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
+    country = db.relationship('GeoCountryInfo')
+    admin1_code = db.Column(db.Unicode(7))
+    admin2_code = db.Column(db.Unicode(23))
+
+    def __repr__(self):
+        return '<GeoAdmin2Code %d "%s">' % (self.geonameid, self.ascii_title)
+
+
 class GeoName(BaseNameMixin, db.Model):
     __tablename__ = 'geo_name'
 
@@ -56,14 +101,20 @@ class GeoName(BaseNameMixin, db.Model):
     country = db.relationship('GeoCountryInfo')
     cc2 = db.Column(db.Unicode(60))
     admin1 = db.Column(db.Unicode(20))
-    admin1code = db.relationship('GeoAdmin1Code', uselist=False,
+    admin1_ref = db.relationship('GeoAdmin1Code', uselist=False,
         primaryjoin='and_(GeoName.country_id == foreign(GeoAdmin1Code.country_id), '
             'GeoName.admin1 == foreign(GeoAdmin1Code.admin1_code))')
+    admin1_id = db.Column(None, db.ForeignKey('geo_admin1_code.id'), nullable=True)
+    admin1code = db.relationship('GeoAdmin1Code', uselist=False, foreign_keys=[admin1_id])
+
     admin2 = db.Column(db.Unicode(80))
-    admin2code = db.relationship('GeoAdmin2Code', uselist=False,
+    admin2_ref = db.relationship('GeoAdmin2Code', uselist=False,
         primaryjoin='and_(GeoName.country_id == foreign(GeoAdmin2Code.country_id), '
             'GeoName.admin1 == foreign(GeoAdmin2Code.admin1_code), '
             'GeoName.admin2 == foreign(GeoAdmin2Code.admin2_code))')
+    admin2_id = db.Column(None, db.ForeignKey('geo_admin2_code.id'), nullable=True)
+    admin2code = db.relationship('GeoAdmin2Code', uselist=False, foreign_keys=[admin2_id])
+
     admin3 = db.Column(db.Unicode(20))
     admin4 = db.Column(db.Unicode(20))
     population = db.Column(db.BigInteger)
@@ -119,6 +170,8 @@ class GeoName(BaseNameMixin, db.Model):
             related['admin1'] = self.admin1code.geoname
         if self.country and self.country.geonameid != self.geonameid:
             related['country'] = self.country.geoname
+        if (self.fclass, self.fcode) != (u'L', u'CONT') and self.country:
+            related['continent'] = GeoName.query.get(continent_codes[self.country.continent])
         return related
 
     def as_dict(self, related=True, alternate_titles=True):
@@ -141,13 +194,14 @@ class GeoName(BaseNameMixin, db.Model):
             'is_country': bool(self.has_country),
             'is_admin1': bool(self.has_admin1code),
             'is_admin2': bool(self.has_admin2code),
+            'is_continent': (self.fclass, self.fcode) == (u'L', u'CONT'),
             'population': self.population,
             'elevation': self.elevation,
             'dem': self.dem,
             'timezone': self.timezone,
             'moddate': self.moddate.strftime('%Y-%m-%d') if self.moddate else None,
-            'related': dict([(k, v.as_dict(related=False, alternate_titles=False))
-                for (k, v) in self.related_geonames().items()]) if related else [],
+            'related': {k: v.as_dict(related=False, alternate_titles=False)
+                for (k, v) in self.related_geonames().items()} if related else {},
             'alternate_titles': [{
                 'lang': a.lang,
                 'title': a.title,
@@ -260,41 +314,6 @@ class GeoAltName(BaseMixin, db.Model):
 
     def __repr__(self):
         return '<GeoAltName %s "%s" of %s>' % (self.lang, self.title, repr(self.geoname)[1:-1] if self.geoname else None)
-
-
-class GeoAdmin1Code(BaseMixin, db.Model):
-    __tablename__ = 'geo_admin1_code'
-
-    geonameid = db.synonym('id')
-    geoname = db.relationship('GeoName', uselist=False,
-        primaryjoin='GeoAdmin1Code.id == foreign(GeoName.id)',
-        backref='has_admin1code')
-    title = db.Column(db.Unicode(200))
-    ascii_title = db.Column(db.Unicode(200))
-    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
-    country = db.relationship('GeoCountryInfo')
-    admin1_code = db.Column(db.Unicode(7))
-
-    def __repr__(self):
-        return '<GeoAdmin1Code %d "%s">' % (self.geonameid, self.ascii_title)
-
-
-class GeoAdmin2Code(BaseMixin, db.Model):
-    __tablename__ = 'geo_admin2_code'
-
-    geonameid = db.synonym('id')
-    geoname = db.relationship('GeoName', uselist=False,
-        primaryjoin='GeoAdmin2Code.id == foreign(GeoName.id)',
-        backref='has_admin2code')
-    title = db.Column(db.Unicode(200))
-    ascii_title = db.Column(db.Unicode(200))
-    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
-    country = db.relationship('GeoCountryInfo')
-    admin1_code = db.Column(db.Unicode(7))
-    admin2_code = db.Column(db.Unicode(23))
-
-    def __repr__(self):
-        return '<GeoAdmin2Code %d "%s">' % (self.geonameid, self.ascii_title)
 
 
 create_geo_country_info_index = DDL(

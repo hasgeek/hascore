@@ -26,3 +26,4 @@ error.log
 data/*.txt
 data/*.csv
 data/*.zip
+data/*.sql
