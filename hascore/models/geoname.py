@@ -128,9 +128,9 @@ class GeoName(BaseNameMixin, db.Model):
         if self.has_country:
             return self.has_country.title
         elif self.has_admin1code:
-            return self.admin1code.title
+            return self.admin1code.title if self.admin1code else self.admin1_ref.title
         elif self.has_admin2code:
-            return self.admin2code.title
+            return self.admin2code.title if self.admin2code else self.admin2_ref.title
         else:
             return self.ascii_title or self.title
 
