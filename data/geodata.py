@@ -121,49 +121,57 @@ def load_geonames(fd):
 
     geonames = []
 
+    # Feature descriptions: http://download.geonames.org/export/dump/featureCodes_en.txt
+    # Sorting order, larger number has more weight
+    loadfeatures = {
+        ('L', 'CONT'):  21,  # Continent
+        ('A', 'PCL'):   20,  # Political entity (country)
+        ('A', 'PCLD'):  19,  # Dependent political entity
+        ('A', 'PCLF'):  18,  # Freely associated state
+        ('A', 'PCLI'):  17,  # Independent political entity
+        ('A', 'PCLS'):  16,  # Semi-independent political entity
+        ('A', 'ADM1'):  15,  # First-order administrative division (state, province)
+        ('P', 'PPLC'):  14,  # capital of a political entity
+        ('P', 'PPLA'):  13,  # Seat of a first-order administrative division (state capital)
+        ('P', 'PPLA2'): 12,  # Seat of a second-order administrative division
+        ('P', 'PPLA3'): 11,  # Seat of a third-order administrative division
+        ('P', 'PPLA4'): 10,  # Seat of a fourth-order administrative division
+        ('P', 'PPLG'):   9,  # Seat of government of a political entity
+        ('P', 'PPL'):    8,  # Populated place (city, could be a neighbourhood too)
+        ('P', 'PPLR'):   7,  # Religious populated place
+        ('P', 'PPLS'):   6,  # Populated places
+        ('P', 'PPLX'):   5,  # Section of populated place
+        ('P', 'PPLL'):   4,  # Populated locality
+        ('P', 'PPLF'):   3,  # Farm village
+        ('A', 'ADM2'):   2,  # Second-order administrative division (district, county)
+        ('A', 'ADM3'):   1,  # Third-order administrative division
+        }
+
     for counter, line in enumerate(fd):
         loadprogress.update(counter)
 
         if not line.startswith('#'):
             rec = GeoNameRecord(*line.strip().split('\t'))
-            if rec.fclass == 'P' and ((rec.population.isdigit() and int(rec.population) < 15000) or not rec.population.isdigit()):
+            # Ignore places that have a population below 15,000, but keep places that have a population of 0,
+            # since that indicates data wasn't available
+            if rec.fclass == 'P' and (
+                    (rec.population.isdigit() and int(rec.population != 0) and int(rec.population) < 15000)
+                    or not rec.population.isdigit()):
                 continue
-            if [rec.fclass, rec.fcode] not in [
-                    ['L', 'CONT'],
-                    ['L', 'RGNE'],
-                    ['A', 'ADM1'],
-                    ['A', 'ADM2'],
-                    ['A', 'PCL'],
-                    ['A', 'PCLD'],
-                    ['A', 'PCLF'],
-                    ['A', 'PCLI'],
-                    ['A', 'PCLS'],
-                    ['P', 'PPL'],
-                    ['P', 'PPLA4'],
-                    ['P', 'PPLX'],
-                    ['P', 'PPLR'],
-                    ['P', 'PPLC'],
-                    ['P', 'PPLCH'],
-                    ['P', 'PPLW'],
-                    ['P', 'PPLG'],
-                    ['P', 'PPLA2'],
-                    ['P', 'PPLH'],
-                    ['P', 'PPLL'],
-                    ['P', 'PPLA'],
-                    ['P', 'PPLQ'],
-                    ['P', 'PPLS'],
-                    ['P', 'PPLF'],
-                    ['P', 'PPLA3'],
-                    ]:
+            if (rec.fclass, rec.fcode) not in loadfeatures:
                 continue
             geonames.append(rec)
 
     loadprogress.finish()
 
-    print "Processing %d records..." % len(geonames)
-    geonames.sort(key=lambda n: int(n.population) if n.population else None)
-    geonames.reverse()
+    print "Sorting %d records..." % len(geonames)
+
+    geonames = [row[2] for row in sorted(
+        [(loadfeatures[(rec.fclass, rec.fcode)], int(rec.population) if rec.population else 0, rec) for rec in geonames],
+        reverse=True)]
     GeoName.query.all()  # Load all data into session cache for faster lookup
+
+    print "Processing %d records..." % len(geonames)
 
     for item in progress(geonames):
         if item.geonameid:
@@ -186,6 +194,8 @@ def load_geonames(fd):
             gn.admin2 = item.admin2 or None
             gn.admin3 = item.admin3 or None
             gn.admin4 = item.admin4 or None
+            gn.admin1code = gn.admin1_ref
+            gn.admin2code = gn.admin2_ref
             gn.population = int(item.population) if item.population else None
             gn.elevation = int(item.elevation) if item.elevation else None
             gn.dem = int(item.dem) if item.dem else None
@@ -282,15 +292,15 @@ def load_admin2_codes(fd):
 def main(env):
     init_for(env)
     for filename in [
-            'countryInfo.txt', 'IN.zip', 'allCountries.zip', 'admin1CodesASCII.txt',
-            'admin2Codes.txt', 'alternateNames.zip']:
+            'countryInfo.txt',  'admin1CodesASCII.txt', 'admin2Codes.txt',
+            'IN.zip', 'allCountries.zip', 'alternateNames.zip']:
         downloadfile('http://download.geonames.org/export/dump/', filename)
 
     load_country_info(open('countryInfo.txt'))
-    load_geonames(open('IN.txt'))
-    load_geonames(open('allCountries.txt'))
     load_admin1_codes(open('admin1CodesASCII.txt'))
     load_admin2_codes(open('admin2Codes.txt'))
+    load_geonames(open('IN.txt'))
+    load_geonames(open('allCountries.txt'))
     load_alt_names(open('alternateNames.txt'))
 
 
