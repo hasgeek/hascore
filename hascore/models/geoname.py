@@ -296,7 +296,6 @@ class GeoName(BaseNameMixin, db.Model):
                         results.append({'token': token})
             else:
                 results.append({'token': token})
-
             
             if ltoken in special:
                 results[-1]['special'] = True
