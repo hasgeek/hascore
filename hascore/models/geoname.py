@@ -240,6 +240,7 @@ class GeoName(BaseNameMixin, db.Model):
         If a country bias is provided (as two letter uppercase country code), results from that
         country are prioritised.
         """
+        special = [s.lower() for s in special]
         filtlike = lambda q: q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
         tokens = NOWORDS_RE.split(q)
         while '' in tokens:
@@ -295,7 +296,9 @@ class GeoName(BaseNameMixin, db.Model):
                         results.append({'token': token})
             else:
                 results.append({'token': token})
-
+            
+            if ltoken in special:
+                results[-1]['special'] = True
             counter += 1
         return results
 
