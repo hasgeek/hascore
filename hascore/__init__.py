@@ -21,11 +21,8 @@ from .models import db
 
 
 # Configure the app
-def init_for(env, createdb=False):
+def init_for(env):
     coaster.app.init_app(app, env)
-    # This is required before baseframe init:
-    if createdb:
-        models.db.create_all()
 
     baseframe.init_app(app, requires=['baseframe'])
     lastuser.init_app(app)
@@ -38,6 +35,3 @@ def init_for(env, createdb=False):
             filters='cssmin', output='css/baseframe-networkbar.css'))
 
     views.admin.init_admin(admin)
-
-    with app.test_request_context():
-        views.networkbar.cache_networkbar_links()

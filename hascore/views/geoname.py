@@ -25,7 +25,7 @@ def geo_get_by_title(title, lang=None):
 
 
 @app.route('/1/geo/parse_locations')
-@requestargs('q', 'special[]' 'lang', 'bias[]')
+@requestargs('q', 'special[]', 'lang', 'bias[]')
 def geo_parse_location(q, special=[], lang=None, bias=[]):
     result = GeoName.parse_locations(q, special, lang, bias)
     for item in result:

@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from hascore import app, init_for
+from hascore import app, init_for, views
 init_for('dev')
+with app.test_request_context():
+	views.networkbar.cache_networkbar_links()
 
 try:
     port = int(sys.argv[1])

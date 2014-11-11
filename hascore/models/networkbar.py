@@ -16,7 +16,7 @@ class NetworkLink(BaseNameMixin, db.Model):
     #: Sequence number for ordering
     seq = db.Column(db.SmallInteger, nullable=False)
     #: Parent for submenus
-    parent_id = db.Column(None, db.ForeignKey('networklink.id'), nullable=True)
+    parent_id = db.Column(None, db.ForeignKey('networklink.id', use_alter=True, name='fk_networklink_parent_id'), nullable=True)
     parent = db.relationship('NetworkLink', remote_side='NetworkLink.id',
         backref=db.backref('children', order_by=seq, collection_class=ordering_list('seq')))
 

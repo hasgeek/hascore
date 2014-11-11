@@ -2,6 +2,7 @@ Flask
 Flask-SQLAlchemy
 Flask-Lastuser
 Flask-Admin
+https://github.com/jace/flask-alembic/archive/master.zip
 Flask-Script==0.5.3
 Flask-RQ
 coaster
