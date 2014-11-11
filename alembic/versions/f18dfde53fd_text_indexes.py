@@ -29,5 +29,5 @@ def downgrade():
     op.drop_index('ix_geo_alt_name_lang')
     op.drop_index('ix_geo_alt_name_title')
     op.drop_index('ix_geo_name_ascii_title')
-    op.drop_index('ix_geo_name_title', )
+    op.drop_index('ix_geo_name_title')
     op.drop_index('ix_geo_country_info_title')
