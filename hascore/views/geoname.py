@@ -2,14 +2,12 @@
 
 from coaster.utils import getbool
 from coaster.views import jsonp, requestargs
-from baseframe import cache
 from .. import app
 from ..models import GeoName
 
 
 @app.route('/1/geo/get_by_name')
 @requestargs('name', ('related', getbool), ('alternate_titles', getbool))
-@cache.memoize(timeout=86400)
 def geo_get_by_name(name, related=False, alternate_titles=False):
     if name.isdigit():
         geoname = GeoName.query.get(int(name))
@@ -21,7 +19,6 @@ def geo_get_by_name(name, related=False, alternate_titles=False):
 
 @app.route('/1/geo/get_by_names')
 @requestargs('name[]', ('related', getbool), ('alternate_titles', getbool))
-@cache.memoize(timeout=86400)
 def geo_get_by_names(name, related=False, alternate_titles=False):
     geonames = []
     for n in name:
@@ -39,14 +36,12 @@ def geo_get_by_names(name, related=False, alternate_titles=False):
 
 @app.route('/1/geo/get_by_title')
 @requestargs('title[]', 'lang')
-@cache.memoize(timeout=86400)
 def geo_get_by_title(title, lang=None):
     return jsonp({'status': 'ok', 'result': [g.as_dict() for g in GeoName.get_by_title(title, lang)]})
 
 
 @app.route('/1/geo/parse_locations')
 @requestargs('q', 'special[]', 'lang', 'bias[]', ('alternate_titles', getbool))
-@cache.memoize(timeout=86400)
 def geo_parse_location(q, special=[], lang=None, bias=[], alternate_titles=False):
     result = GeoName.parse_locations(q, special, lang, bias)
     for item in result:
