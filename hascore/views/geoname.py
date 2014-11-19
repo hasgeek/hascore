@@ -8,14 +8,33 @@ from ..models import GeoName
 
 
 @app.route('/1/geo/get_by_name')
-@requestargs('name')
+@requestargs('name', ('related', getbool), ('alternate_titles', getbool))
 @cache.memoize(timeout=86400)
-def geo_get_by_name(name):
+def geo_get_by_name(name, related=False, alternate_titles=False):
     if name.isdigit():
         geoname = GeoName.query.get(int(name))
     else:
         geoname = GeoName.get(name)
-    return jsonp({'status': 'ok', 'result': geoname.as_dict()} if geoname else {'status': 'error', 'error': 'not_found'})
+    return jsonp({'status': 'ok', 'result': geoname.as_dict(related=related, alternate_titles=alternate_titles)}
+        if geoname else {'status': 'error', 'error': 'not_found'})
+
+
+@app.route('/1/geo/get_by_names')
+@requestargs('name[]', ('related', getbool), ('alternate_titles', getbool))
+@cache.memoize(timeout=86400)
+def geo_get_by_names(name, related=False, alternate_titles=False):
+    geonames = []
+    for n in name:
+        if n.isdigit():
+            geoname = GeoName.query.get(int(n))
+        else:
+            geoname = GeoName.get(n)
+        if geoname:
+            geonames.append(geoname)
+    return jsonp({
+        'status': 'ok',
+        'result': [geoname.as_dict(related=related, alternate_titles=alternate_titles) for geoname in geonames]
+        })
 
 
 @app.route('/1/geo/get_by_title')
@@ -27,6 +46,7 @@ def geo_get_by_title(title, lang=None):
 
 @app.route('/1/geo/parse_locations')
 @requestargs('q', 'special[]', 'lang', 'bias[]', ('alternate_titles', getbool))
+@cache.memoize(timeout=86400)
 def geo_parse_location(q, special=[], lang=None, bias=[], alternate_titles=False):
     result = GeoName.parse_locations(q, special, lang, bias)
     for item in result:
