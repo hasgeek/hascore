@@ -23,6 +23,8 @@ continent_codes = {
     'AN': 6255152,
     }
 
+filtlike = lambda q: q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
+
 
 class GeoCountryInfo(BaseNameMixin, db.Model):
     __tablename__ = 'geo_country_info'
@@ -202,14 +204,7 @@ class GeoName(BaseNameMixin, db.Model):
             'moddate': self.moddate.strftime('%Y-%m-%d') if self.moddate else None,
             'related': {k: v.as_dict(related=False, alternate_titles=False)
                 for (k, v) in self.related_geonames().items()} if related else {},
-            'alternate_titles': [{
-                'lang': a.lang,
-                'title': a.title,
-                'is_preferred_name': a.is_preferred_name,
-                'is_short_name': a.is_short_name,
-                'is_colloquial': a.is_colloquial,
-                'is_historic': a.is_historic,
-                } for a in self.alternate_titles] if alternate_titles else []
+            'alternate_titles': [a.as_dict() for a in self.alternate_titles] if alternate_titles else []
             }
 
     @classmethod
@@ -241,7 +236,6 @@ class GeoName(BaseNameMixin, db.Model):
         country are prioritised.
         """
         special = [s.lower() for s in special]
-        filtlike = lambda q: q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
         tokens = NOWORDS_RE.split(q)
         while '' in tokens:
             tokens.remove('')  # Remove blank tokens from beginning and end
@@ -259,7 +253,7 @@ class GeoName(BaseNameMixin, db.Model):
                 # Find a GeoAltName matching token, add GeoAltName.geoname to results
                 if lang:
                     matches = GeoAltName.query.filter(
-                        db.func.lower(GeoAltName.title).like(filtlike(ltoken)),
+                        db.func.lower(GeoAltName.title).like(filtlike(ltoken))).filter(
                         db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).options(
                             joinedload('geoname').joinedload('country'),
                             joinedload('geoname').joinedload('admin1code'),
@@ -302,6 +296,14 @@ class GeoName(BaseNameMixin, db.Model):
             counter += 1
         return results
 
+    @classmethod
+    def autocomplete(cls, q, lang=None):
+        query = cls.query.join(cls.alternate_titles).filter(db.func.lower(GeoAltName.title).like(filtlike(q.lower()))
+            ).order_by(db.desc(cls.population))
+        if lang:
+            query = query.filter(db.or_(GeoAltName.lang == None, GeoAltName.lang == lang))
+        return query
+
 
 class GeoAltName(BaseMixin, db.Model):
     __tablename__ = 'geo_alt_name'
@@ -317,6 +319,17 @@ class GeoAltName(BaseMixin, db.Model):
 
     def __repr__(self):
         return '<GeoAltName %s "%s" of %s>' % (self.lang, self.title, repr(self.geoname)[1:-1] if self.geoname else None)
+
+    def as_dict(self):
+        return {
+            'geonameid': self.geonameid,
+            'lang': self.lang,
+            'title': self.title,
+            'is_preferred_name': self.is_preferred_name,
+            'is_short_name': self.is_short_name,
+            'is_colloquial': self.is_colloquial,
+            'is_historic': self.is_historic,
+            }
 
 
 create_geo_country_info_index = DDL(
