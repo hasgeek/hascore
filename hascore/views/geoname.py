@@ -30,7 +30,7 @@ def geo_get_by_names(name, related=False, alternate_titles=False):
             geonames.append(geoname)
     return jsonp({
         'status': 'ok',
-        'result': [geoname.as_dict(related=related, alternate_titles=alternate_titles) for geoname in geonames]
+        'result': [gn.as_dict(related=related, alternate_titles=alternate_titles) for gn in geonames]
         })
 
 

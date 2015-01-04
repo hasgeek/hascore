@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from flask import g
-from flask.ext.lastuser.sqlalchemy import UserBase
+from flask.ext.lastuser.sqlalchemy import UserBase2
 from . import db
 
 __all__ = ['User']
 
 
-class User(UserBase, db.Model):
+class User(UserBase2, db.Model):
     __tablename__ = 'user'
-
-
-def default_user(context):
-    return g.user.id if g.user else None

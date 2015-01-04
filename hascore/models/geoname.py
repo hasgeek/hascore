@@ -225,7 +225,6 @@ class GeoName(BaseNameMixin, db.Model):
                     db.func.lower(GeoAltName.title) == title.lower()).all() if r.geoname])
         return sorted(list(results), key=lambda g: ({'A': 1, 'P': 2}.get(g.fclass, 0), g.population), reverse=True)
 
-
     @classmethod
     def parse_locations(cls, q, special=[], lang=None, bias=[]):
         """
@@ -254,7 +253,7 @@ class GeoName(BaseNameMixin, db.Model):
                 if lang:
                     matches = GeoAltName.query.filter(
                         db.func.lower(GeoAltName.title).like(filtlike(ltoken))).filter(
-                        db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).options(
+                        db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).options(  # NOQA
                             joinedload('geoname').joinedload('country'),
                             joinedload('geoname').joinedload('admin1code'),
                             joinedload('geoname').joinedload('admin2code')).all()
@@ -272,7 +271,7 @@ class GeoName(BaseNameMixin, db.Model):
                     candidates = [(NOWORDS_RE.split(m.title.lower()), m) for m in matches]
                     fullmatch = []
                     for mtokens, match in candidates:
-                        if mtokens == ltokens[counter:counter+len(mtokens)]:
+                        if mtokens == ltokens[counter:counter + len(mtokens)]:
                             fullmatch.append((len(mtokens), match))
                     if fullmatch:
                         maxmatch = max(f[0] for f in fullmatch)
@@ -284,13 +283,13 @@ class GeoName(BaseNameMixin, db.Model):
                                 {lang: 0}.get(a.lang, 1),
                                 {'A': 1, 'P': 2}.get(a.geoname.fclass, 0),
                                 a.geoname.population), reverse=True)
-                        results.append({'token': ''.join(tokens[counter:counter+maxmatch]), 'geoname': accepted[0].geoname})
+                        results.append({'token': ''.join(tokens[counter:counter + maxmatch]), 'geoname': accepted[0].geoname})
                         counter += maxmatch - 1
                     else:
                         results.append({'token': token})
             else:
                 results.append({'token': token})
-            
+
             if ltoken in special:
                 results[-1]['special'] = True
             counter += 1
@@ -301,7 +300,7 @@ class GeoName(BaseNameMixin, db.Model):
         query = cls.query.join(cls.alternate_titles).filter(db.func.lower(GeoAltName.title).like(filtlike(q.lower()))
             ).order_by(db.desc(cls.population))
         if lang:
-            query = query.filter(db.or_(GeoAltName.lang == None, GeoAltName.lang == lang))
+            query = query.filter(db.or_(GeoAltName.lang == None, GeoAltName.lang == lang))  # NOQA
         return query
 
 
