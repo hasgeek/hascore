@@ -149,9 +149,11 @@ class GeoName(BaseNameMixin, db.Model):
         if (self.fclass, self.fcode) == (u'L', u'CONT'):
             suffix = 'continent'
             country = None
+            state = None
         elif self.has_country:
             suffix = 'country'
             country = None
+            state = None
         elif self.has_admin1code:
             if country in ('CA', 'CN', 'AF'):
                 suffix = 'province'
