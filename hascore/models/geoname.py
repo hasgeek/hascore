@@ -139,17 +139,37 @@ class GeoName(BaseNameMixin, db.Model):
     @property
     def picker_title(self):
         title = self.short_title
+        country = self.country_id
+        if country == 'US':
+            state = self.admin1
+        else:
+            state = None
         suffix = None
 
         if (self.fclass, self.fcode) == (u'L', u'CONT'):
             suffix = 'continent'
+            country = None
         elif self.has_country:
             suffix = 'country'
+            country = None
         elif self.has_admin1code:
-            suffix = 'state'  # TODO: Make table of naming convention by country
+            if country in ('CA', 'CN', 'AF'):
+                suffix = 'province'
+            else:
+                suffix = 'state'
+            state = None
         elif self.has_admin2code:
-            suffix = 'district'  # TODO: Again, naming convention by country
+            if country == 'US':
+                suffix = 'county'
+            elif country == 'CN':
+                suffix = 'prefecture'
+            else:
+                suffix = 'district'
 
+        if state:
+            title = '%s, %s' % (title, state)
+        if country:
+            title = '%s, %s' % (title, country)
         if suffix:
             return '%s (%s)' % (title, suffix)
         else:
