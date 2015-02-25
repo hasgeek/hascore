@@ -137,6 +137,25 @@ class GeoName(BaseNameMixin, db.Model):
             return self.ascii_title or self.title
 
     @property
+    def picker_title(self):
+        title = self.short_title
+        suffix = None
+
+        if (self.fclass, self.fcode) == (u'L', u'CONT'):
+            suffix = 'continent'
+        elif self.has_country:
+            suffix = 'country'
+        elif self.has_admin1code:
+            suffix = 'state'  # TODO: Make table of naming convention by country
+        elif self.has_admin2code:
+            suffix = 'district'  # TODO: Again, naming convention by country
+
+        if suffix:
+            return '%s (%s)' % (title, suffix)
+        else:
+            return title
+
+    @property
     def geoname(self):
         return self
 
@@ -183,6 +202,7 @@ class GeoName(BaseNameMixin, db.Model):
             'title': self.title,
             'ascii_title': self.ascii_title,
             'short_title': self.short_title,
+            'picker_title': self.picker_title,
             'latitude': unicode(self.latitude),
             'longitude': unicode(self.longitude),
             'fclass': self.fclass,
