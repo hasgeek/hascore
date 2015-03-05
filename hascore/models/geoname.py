@@ -138,7 +138,7 @@ class GeoName(BaseNameMixin, db.Model):
 
     @property
     def picker_title(self):
-        title = self.short_title
+        title = self.use_title
         country = self.country_id
         if country == 'US':
             state = self.admin1
@@ -181,24 +181,30 @@ class GeoName(BaseNameMixin, db.Model):
     def geoname(self):
         return self
 
+    @property
+    def use_title(self):
+        usetitle = self.ascii_title
+        if self.fclass == u'A' and self.fcode.startswith(u'PCL'):
+            if u'of the' in usetitle:
+                usetitle = usetitle.split(u'of the')[-1].strip()
+            elif u'of The' in usetitle:
+                usetitle = usetitle.split(u'of The')[-1].strip()
+            elif u'of' in usetitle:
+                usetitle = usetitle.split(u'of')[-1].strip()
+        elif self.fclass == u'A' and self.fcode == 'ADM1':
+            usetitle = usetitle.replace(u'State of', '').replace(u'Union Territory of', '').strip()
+        return usetitle
+
     def make_name(self, reserved=[]):
         if self.ascii_title:
-            usetitle = self.ascii_title
-            if self.fclass == u'A' and self.fcode.startswith(u'PCL'):
-                if u'of the' in usetitle:
-                    usetitle = usetitle.split(u'of the')[-1].strip()
-                elif u'of The' in usetitle:
-                    usetitle = usetitle.split(u'of The')[-1].strip()
-                elif u'of' in usetitle:
-                    usetitle = usetitle.split(u'of')[-1].strip()
-            elif self.fclass == u'A' and self.fcode == 'ADM1':
-                usetitle = usetitle.replace(u'State of', '').replace(u'Union Territory of', '').strip()
-
+            usetitle = self.use_title
             if self.id:
-                checkused = lambda c: bool(c in reserved or
-                    GeoName.query.filter(GeoName.id != self.id).filter_by(name=c).notempty())
+                def checkused(c):
+                    return bool(c in reserved or
+                        GeoName.query.filter(GeoName.id != self.id).filter_by(name=c).notempty())
             else:
-                checkused = lambda c: bool(c in reserved or GeoName.query.filter_by(name=c).notempty())
+                def checkused(c):
+                    return bool(c in reserved or GeoName.query.filter_by(name=c).notempty())
             with db.session.no_autoflush:
                 self.name = unicode(make_name(usetitle, maxlength=250, checkused=checkused))
 
@@ -224,6 +230,7 @@ class GeoName(BaseNameMixin, db.Model):
             'title': self.title,
             'ascii_title': self.ascii_title,
             'short_title': self.short_title,
+            'use_title': self.use_title,
             'picker_title': self.picker_title,
             'latitude': unicode(self.latitude),
             'longitude': unicode(self.longitude),
