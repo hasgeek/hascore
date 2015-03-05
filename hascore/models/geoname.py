@@ -23,7 +23,9 @@ continent_codes = {
     'AN': 6255152,
     }
 
-filtlike = lambda q: q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
+
+def filtlike(q):
+    return q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
 
 
 class GeoCountryInfo(BaseNameMixin, db.Model):
