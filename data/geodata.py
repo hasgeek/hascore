@@ -292,7 +292,7 @@ def load_admin2_codes(fd):
 def main(env):
     init_for(env)
     for filename in [
-            'countryInfo.txt',  'admin1CodesASCII.txt', 'admin2Codes.txt',
+            'countryInfo.txt', 'admin1CodesASCII.txt', 'admin2Codes.txt',
             'IN.zip', 'allCountries.zip', 'alternateNames.zip']:
         downloadfile('http://download.geonames.org/export/dump/', filename)
 

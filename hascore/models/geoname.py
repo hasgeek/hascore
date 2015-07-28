@@ -68,7 +68,7 @@ class GeoAdmin1Code(BaseMixin, db.Model):
     ascii_title = db.Column(db.Unicode(200))
     country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
     country = db.relationship('GeoCountryInfo')
-    admin1_code = db.Column(db.Unicode(7))
+    admin1_code = db.Column(db.Unicode(8))
 
     def __repr__(self):
         return '<GeoAdmin1Code %d "%s">' % (self.geonameid, self.ascii_title)
@@ -85,7 +85,7 @@ class GeoAdmin2Code(BaseMixin, db.Model):
     ascii_title = db.Column(db.Unicode(200))
     country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
     country = db.relationship('GeoCountryInfo')
-    admin1_code = db.Column(db.Unicode(7))
+    admin1_code = db.Column(db.Unicode(8))
     admin2_code = db.Column(db.Unicode(23))
 
     def __repr__(self):
