@@ -1,7 +1,7 @@
 Flask
 Flask-SQLAlchemy
 Flask-Admin
-https://github.com/jace/flask-alembic/archive/master.zip
+git+https://github.com/jace/flask-alembic.git
 Flask-Script==0.5.3
 Flask-RQ
 git+https://github.com/hasgeek/coaster.git
@@ -12,4 +12,3 @@ progressbar2
 nltk
 numpy
 requests
-
