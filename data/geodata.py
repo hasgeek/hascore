@@ -217,7 +217,7 @@ def load_alt_names(fd):
         widgets=[progressbar.widgets.Percentage(), ' ', progressbar.widgets.Bar(), ' ', progressbar.widgets.ETA(), ' ']).start()
 
     def update_progress(counter):
-        loadprogress.update(counter+1)
+        loadprogress.update(counter + 1)
         return True
 
     geonameids = set([r[0] for r in db.session.query(GeoName.id).all()])
