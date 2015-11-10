@@ -4,52 +4,53 @@ HasCore: HasGeek API
 ![Build status](https://secure.travis-ci.org/hasgeek/hascore.png)
 [![Coverage Status](https://coveralls.io/repos/hasgeek/hascore/badge.png?branch=master)](https://coveralls.io/r/hasgeek/hascore?branch=master)
 
-Hascore provides helper API methods including the networkbar that is shown
-on all sites, and API endpoints for geolocation and language analysis.
+Hascore provides helper API methods including the networkbar that is shown on all sites, and API endpoints for geolocation and language analysis.
 
-##How to install HasCore on your machine.
-
-Git clone the HasCore repo or fork it from HasGeek repo and then clone the forked repo,if you wish to send pull requests.
+-----
+### NLTK
 
 Hascore requires NLTK. You will need to install NLTK's corpus data. Be warned, this is about 1.8 GB:
 
-   `$ python -m nltk.downloader all`
+    $ python -m nltk.downloader all
+    
+### Postgres
 
-If you wish to run hascore in virtual environment, then create a virtual environment in same folder where you cloned the HasCore repo.
+Hascore uses Postgres >=9.4 and Redis server for development. To set up a Postgres DB:
 
-   `$ virtualenv <name of your virtual environment>`
+On OS X using the [Postgres App](http://postgresapp.com):
 
-Follow the link http://docs.python-guide.org/en/latest/dev/virtualenvs/, to learn more about virtual environments.
+    $ createuser hascore
+    $ createdb hasgeek
 
-Activate the virtual environment.
+On any Linux distribution:
 
-   `$ source <name of the virtual environment>/bin/activate`
+    $ sudo -u postgres createuser hascore
+    $ sudo -u postgres createdb hasgeek
+    
+* Edit the `\instance\setting-sample.py` to change the following variables: `SQLALCHEMY_DATABASE_URI` to `postgres://hasgeek:hasgeek@localhost/hascore_old`, `LASTUSER_CLIENT_ID` to`ID` and `LASTUSER_CLIENT_SECRET` to `pwd`
 
-Install the required libraries for HasCore.
+## Installation
 
-   `$ pip install -r requirements.txt`
+Hascore runs on [Python](https://www.python.org) with the [Flask](http://flask.pocoo.org/) microframework. You can choose to set up your development environment in the following way:
 
-If you are using Mac OS X and had trouble installing Numpy, please see the instructions here: https://gist.github.com/goldsmith/7262122
+#### Virutalenv + Pip/easy_install
 
-Note: psycong2 requires PostgreSQL server installation.
+[Virtualenv](docs.python-guide.org/en/latest/dev/virtualenvs/) is strongly recommended to ensure Hascore's elaborate and sometimes version-specific requirements doesn't clash with anything else.
 
-Copy the setting-sample.py file in instance folder to development.py  
-   `$ cp settings-sample.py development.py`
+1. Install the required libraries for Hascore in `requirements.txt` using `easy_install` or `pip`:
 
-Edit the following fields in development.py (where 'ID' and 'pwd' are the authentication obtained from HasGeek):
+    `$ pip install -r requirements.txt`
 
-``` 
-   SQLALCHEMY_DATABASE_URI = 'postgres://hasgeek:hasgeek@localhost/hascore_old'
-   LASTUSER_CLIENT_ID = 'ID'
-   LASTUSER_CLIENT_SECRET = 'pwd'
-``` 
+   If you are using Mac OS X and had trouble installing Numpy, please see the instructions here:            
+   (https://gist.github.com/goldsmith/7262122)
 
-Create the PostgreSQL database by running the command:
+  
+2. Finish configuration with:
 
-   `$ python manange.py`
+    `$ python manange.py db create`
 
-Assuming you have PostgreSQL and Redis server installed on your machine, run the HasCore server by running this command:
+3. Before you run the server in development mode, make sure you have Postgres server and Redis server running as well. To start     Hascore:
 
-   `$ python runserver.py`
+    `$ python runserver.py`
 
 
