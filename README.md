@@ -19,15 +19,18 @@ Hascore uses Postgres >=9.4 and Redis server for development. To set up a Postgr
 
 On OS X using the [Postgres App](http://postgresapp.com):
 
+    $ # Add Postgres app to the path if it's not already in there
+    $ export PATH="/Applications/Postgres.app/Contents/Versions/9.4/bin:$PATH"
+    $ # Make the user and database
     $ createuser -d hascore 
-    $ createdb -O hascore -W hasgeek
+    $ createdb -O hascore -W hascore
 
 On any Linux distribution:
 
     $ sudo -u postgres createuser -d hascore
-    $ sudo -u postgres createdb -O hascore hasgeek
+    $ sudo -u postgres createdb -O hascore hascore
     
-* Edit the `\instance\setting-sample.py` to change the following variables: `SQLALCHEMY_DATABASE_URI` to `postgres://hasgeek:hasgeek@localhost/hascore_old`, `LASTUSER_CLIENT_ID` to`ID` and `LASTUSER_CLIENT_SECRET` to `pwd`
+* Edit the `\instance\setting-sample.py` to change the following variables: `SQLALCHEMY_DATABASE_URI` to `postgres://hasgeek:YOUR_PASSWORD_HERE@localhost/hascore`.
 
 ## Installation
 
