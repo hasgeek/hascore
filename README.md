@@ -30,7 +30,7 @@ On any Linux distribution:
     $ sudo -u postgres createuser -d hascore
     $ sudo -u postgres createdb -O hascore hascore
     
-* Edit the `\instance\setting-sample.py` to change the following variables: `SQLALCHEMY_DATABASE_URI` to `postgres://hasgeek:YOUR_PASSWORD_HERE@localhost/hascore`.
+* Edit the `\instance\setting-sample.py` to change the following variables: `SQLALCHEMY_DATABASE_URI` to `postgres://hascore:YOUR_PASSWORD_HERE@localhost/hascore`.
 
 ## Installation
 
