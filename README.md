@@ -51,8 +51,12 @@ Hascore runs on [Python](https://www.python.org) with the [Flask](http://flask.p
 2. Finish configuration with:
 
     `$ python manange.py db create`
+    
+3. Add geographical data (GeoNames) to your db with:
 
-3. Before you run the server in development mode, make sure you have Postgres server and Redis server running as well. To start     Hascore:
+    `$ python /data/geoname.py dev`
+
+4. Before you run the server in development mode, make sure you have Postgres server and Redis server running as well. To start     Hascore:
 
     `$ python runserver.py`
 
