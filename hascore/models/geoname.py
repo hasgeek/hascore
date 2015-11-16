@@ -6,7 +6,6 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import DDL, event
 from coaster.utils import make_name
 from . import db, BaseMixin, BaseNameMixin
-from math import sin, cos, sqrt, atan2, radians
 
 __all__ = ['GeoName', 'GeoCountryInfo', 'GeoAdmin1Code', 'GeoAdmin2Code', 'GeoAltName']
 
@@ -24,17 +23,6 @@ continent_codes = {
     'AN': 6255152,
     }
 
-def distance(l1, l2, l3, l4):
-    R = 6373.0
-    lat1 = radians(l1)
-    lon1 = radians(l2)
-    lat2 = radians(l3)
-    lon2 = radians(l4)
-    dlon = (lon2 - lon1)
-    dlat = (lat2 - lat1)
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    return R * c
 
 def filtlike(q):
     return q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
@@ -297,15 +285,12 @@ class GeoName(BaseNameMixin, db.Model):
         If a country bias is provided (as two letter uppercase country code), results from that
         country are prioritised.
         """
-        if lang == None:
-            lang = 'en'
         special = [s.lower() for s in special]
         tokens = NOWORDS_RE.split(q)
         while '' in tokens:
             tokens.remove('')  # Remove blank tokens from beginning and end
         ltokens = [t.lower() for t in tokens]
         results = []
-        accepted_lists = []
         counter = 0
         limit = len(tokens)
         while counter < limit:
@@ -342,8 +327,14 @@ class GeoName(BaseNameMixin, db.Model):
                     if fullmatch:
                         maxmatch = max(f[0] for f in fullmatch)
                         accepted = list(set([f[1] for f in fullmatch if f[0] == maxmatch]))
-                        geo = list(dict([("name",i.geoname), ("lat", i.geoname.latitude), ("lon", i.geoname.longitude)]) for i in accepted)
-                        accepted_lists.append(geo)
+                        # Filter accepted down to one match.
+                        # Sort by (a) bias, (b) language match, (c) city over state and (d) population
+                        accepted.sort(
+                            key=lambda a: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(a.geoname.country_id, -1),
+                                {lang: 0}.get(a.lang, 1),
+                                {'A': 1, 'P': 2}.get(a.geoname.fclass, 0),
+                                a.geoname.population), reverse=True)
+                        results.append({'token': ''.join(tokens[counter:counter + maxmatch]), 'geoname': accepted[0].geoname})
                         counter += maxmatch - 1
                     else:
                         results.append({'token': token})
@@ -353,13 +344,6 @@ class GeoName(BaseNameMixin, db.Model):
             if ltoken in special:
                 results[-1]['special'] = True
             counter += 1
-        if len(ltokens) == 3:
-            distance_map = []
-            for i in accepted_lists[0]:
-                for j in accepted_lists[1]:
-                    distance_map.append((i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
-            distance_map.sort(key=lambda tup: tup[2])
-            results.append({'token':ltokens[0], 'geoname': distance_map[0][0]})
         return results
 
     @classmethod
