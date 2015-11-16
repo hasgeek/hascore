@@ -345,13 +345,6 @@ class GeoName(BaseNameMixin, db.Model):
                         geo = list(dict([("name",i.geoname), ("lat", i.geoname.latitude), ("lon", i.geoname.longitude)]) for i in accepted)
                         accepted_lists.append(geo)
                         counter += maxmatch - 1
-        if len(ltokens) == 3:
-            distance_map = []
-            for i in accepted_lists[0]:
-                for j in accepted_lists[1]:
-                    distance_map.append((i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
-            distance_map.sort(key=lambda tup: tup[2])
-            results.append({'token':ltokens[0], 'geoname': distance_map[0][0]})
                     else:
                         results.append({'token': token})
             else:
@@ -360,6 +353,13 @@ class GeoName(BaseNameMixin, db.Model):
             if ltoken in special:
                 results[-1]['special'] = True
             counter += 1
+        if len(ltokens) == 3:
+            distance_map = []
+            for i in accepted_lists[0]:
+                for j in accepted_lists[1]:
+                    distance_map.append((i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
+            distance_map.sort(key=lambda tup: tup[2])
+            results.append({'token':ltokens[0], 'geoname': distance_map[0][0]})
         return results
 
     @classmethod
