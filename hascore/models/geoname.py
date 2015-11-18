@@ -360,14 +360,12 @@ class GeoName(BaseNameMixin, db.Model):
             distance_map.sort(key=lambda tup: tup[2])
             results.append({'token':ltokens[0], 'geoname': distance_map[0][0]})
         else:
-            try:
+            if accepted_lists:
                 accepted.sort(
                          key=lambda a: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(a.geoname.country_id, -1),
                          {lang: 0}.get(a.lang, 1),
                          a.geoname.population), reverse=True)
                 results.append({'token':ltokens[0], 'geoname': accepted[0].geoname})
-            except NameError:
-                pass
         return results
 
     @classmethod
