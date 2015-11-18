@@ -24,12 +24,11 @@ continent_codes = {
     'AN': 6255152,
     }
 
-def distance(l1, l2, l3, l4):
-    R = 6373.0
-    lat1 = radians(l1)
-    lon1 = radians(l2)
-    lat2 = radians(l3)
-    lon2 = radians(l4)
+def distance(lat1, lon1, lat2, lon2):
+    """ this function takes latitude, longitude of two locations(specified in degrees) and computes the distance between them in kms.
+        constant R is the radius of Earth in kms"""
+    R = 6373.0 
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
     dlon = (lon2 - lon1)
     dlat = (lat2 - lat1)
     a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
