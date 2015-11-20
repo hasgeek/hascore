@@ -60,4 +60,10 @@ Hascore is a [Python](https://www.python.org) based [Flask](http://flask.pocoo.o
 
 4. Before you run the server in development mode, make sure you have Postgres server and Redis server running as well. To start Hascore:
 
-    `$ python runserver.py`
+   `$ python runserver.py`
+
+### Usage
+
+Hascore by default runs on port 8070. Access `http://localhost:8070/1/` followed by the module you want to query. For example:
+
+   `$ localhost:8070/1/geo/parse_locations?q=Bhubaneswar`
