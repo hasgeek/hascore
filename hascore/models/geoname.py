@@ -296,8 +296,6 @@ class GeoName(BaseNameMixin, db.Model):
         If a country bias is provided (as two letter uppercase country code), results from that
         country are prioritised.
         """
-        if lang == None:
-            lang = 'en'
         special = [s.lower() for s in special]
         tokens = NOWORDS_RE.split(q)
         while '' in tokens:
@@ -341,7 +339,7 @@ class GeoName(BaseNameMixin, db.Model):
                     if fullmatch:
                         maxmatch = max(f[0] for f in fullmatch)
                         accepted = list(set([f[1] for f in fullmatch if f[0] == maxmatch]))
-                        geo = list(dict([("name",i.geoname), ("lat", i.geoname.latitude), ("lon", i.geoname.longitude)]) for i in accepted)
+                        geo = list(dict([("ID",i.geoname.country_id),("name",i.geoname), ("lat", i.geoname.latitude), ("lon", i.geoname.longitude)]) for i in accepted)
                         accepted_lists.append(geo)
                         counter += maxmatch - 1
                     else:
@@ -356,7 +354,8 @@ class GeoName(BaseNameMixin, db.Model):
             distance_map = []
             for i in accepted_lists[0]:
                 for j in accepted_lists[1]:
-                    distance_map.append((i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
+                    if i['ID'] == j['ID']:
+                        distance_map.append((i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
             distance_map.sort(key=lambda tup: tup[2])
             results.append({'token':ltokens[0], 'geoname': distance_map[0][0]})
         else:
