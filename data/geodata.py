@@ -15,6 +15,7 @@ import unicodecsv
 import requests
 from decimal import Decimal
 from datetime import datetime
+from unidecode import unidecode
 from progressbar import ProgressBar
 import progressbar.widgets
 from coaster.utils import getbool
@@ -183,8 +184,8 @@ def load_geonames(fd):
                 db.session.add(gn)
 
             gn.geonameid = int(item.geonameid)
-            gn.title = item.title or None
-            gn.ascii_title = item.ascii_title or None
+            gn.title = item.title or u''
+            gn.ascii_title = item.ascii_title or unidecode(item.title or u'').replace(u'@', u'a')
             # gn.alternate_titles = item.alternatenames.split(',') if item.alternatenames else None
             gn.latitude = Decimal(item.latitude) or None
             gn.longitude = Decimal(item.longitude) or None

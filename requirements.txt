@@ -12,3 +12,4 @@ progressbar2
 nltk
 numpy
 requests
+unidecode
