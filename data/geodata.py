@@ -156,8 +156,8 @@ def load_geonames(fd):
             # Ignore places that have a population below 15,000, but keep places that have a population of 0,
             # since that indicates data wasn't available
             if rec.fclass == 'P' and (
-                    (rec.population.isdigit() and int(rec.population != 0) and int(rec.population) < 15000)
-                    or not rec.population.isdigit()):
+                    (rec.population.isdigit() and int(rec.population != 0) and int(rec.population) < 15000) or
+                    not rec.population.isdigit()):
                 continue
             if (rec.fclass, rec.fcode) not in loadfeatures:
                 continue
@@ -168,7 +168,8 @@ def load_geonames(fd):
     print "Sorting %d records..." % len(geonames)
 
     geonames = [row[2] for row in sorted(
-        [(loadfeatures[(rec.fclass, rec.fcode)], int(rec.population) if rec.population else 0, rec) for rec in geonames],
+        [(loadfeatures[(item.fclass, item.fcode)], int(item.population) if item.population else 0, item)
+            for item in geonames],
         reverse=True)]
     GeoName.query.all()  # Load all data into session cache for faster lookup
 
