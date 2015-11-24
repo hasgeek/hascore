@@ -149,6 +149,7 @@ def load_geonames(fd):
 
     for counter, line in enumerate(fd):
         loadprogress.update(counter)
+        line = unicode(line, 'utf-8')
 
         if not line.startswith('#'):
             rec = GeoNameRecord(*line.strip().split('\t'))
