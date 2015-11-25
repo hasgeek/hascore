@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from functools import partial
 from flask import Flask
 from flask.ext.assets import Bundle
 from flask.ext.lastuser import Lastuser
 from flask.ext.lastuser.sqlalchemy import UserManager
+from rq_dashboard import RQDashboard
 from baseframe import baseframe, assets
 import coaster.app
 
@@ -31,3 +33,5 @@ def init_for(env):
     app.assets.register('css_networkbar',
         Bundle(assets.require('baseframe-networkbar.css'),
             filters='cssmin', output='css/baseframe-networkbar.css'))
+
+    RQDashboard(app, url_prefix='/rq', auth_handler=partial(lastuser.has_permission, 'siteadmin'))

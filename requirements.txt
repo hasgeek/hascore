@@ -13,3 +13,4 @@ nltk
 numpy
 requests
 unidecode
+rq-dashboard
