@@ -15,7 +15,7 @@ def index():
         resp.append(u'-- %s: %s --' % (category, msg))
     if g.user:
         resp.append(u'User: %s' % g.user)
-    resp.append(u"HasCore. Got a request?")
+    resp.append(u"Hascore. Got a request?")
     return Response(u'\n'.join(resp), mimetype="text/plain")
 
 
