@@ -339,7 +339,7 @@ class GeoName(BaseNameMixin, db.Model):
                     if fullmatch:
                         maxmatch = max(f[0] for f in fullmatch)
                         accepted = list(set([f[1] for f in fullmatch if f[0] == maxmatch]))
-                        geo = list(dict([("ID",i.geoname.country_id),("name",i.geoname), ("lat", i.geoname.latitude), ("lon", i.geoname.longitude)]) for i in accepted)
+                        geo = list(dict([('token',''.join(tokens[counter:counter + maxmatch]) ),('name',i.geoname), ('lat', i.geoname.latitude), ('lon', i.geoname.longitude)]) for i in accepted)
                         accepted_lists.append(geo)
                         counter += maxmatch - 1
                     else:
@@ -350,21 +350,22 @@ class GeoName(BaseNameMixin, db.Model):
             if ltoken in special:
                 results[-1]['special'] = True
             counter += 1
-        if len(ltokens) == 3:
-            distance_map = []
-            for i in accepted_lists[0]:
-                for j in accepted_lists[1]:
-                    if i['ID'] == j['ID']:
-                        distance_map.append((i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
-            distance_map.sort(key=lambda tup: tup[2])
-            results.append({'token':ltokens[0], 'geoname': distance_map[0][0]})
-        else:
+        if len(ltokens) == 1:
             if accepted_lists:
                 accepted.sort(
                          key=lambda a: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(a.geoname.country_id, -1),
                          {lang: 0}.get(a.lang, 1),
                          a.geoname.population), reverse=True)
                 results.append({'token':ltokens[0], 'geoname': accepted[0].geoname})
+        else:
+            if accepted_lists and len(accepted_lists)==2:
+                distance_map = []
+                for i in accepted_lists[0]:
+                    for j in accepted_lists[1]:
+                        if i['name'].country_id == j['name'].country_id:
+                            distance_map.append((i['token'],i['name'], j['name'],distance(i['lat'], i['lon'], j['lat'], j['lon'])))
+                distance_map.sort(key=lambda tup: tup[3])
+                results.append({'token':distance_map[0][0], 'geoname': distance_map[0][1]})
         return results
 
     @classmethod
