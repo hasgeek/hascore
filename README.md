@@ -14,3 +14,25 @@ Be warned, this is about 1.8 GB:
 
 If you are using Mac OS X and had trouble installing Numpy, please see the
 instructions here: https://gist.github.com/goldsmith/7262122
+
+### Install
+
+Ensure you have [Postgres]() installed and running. Setup the DB with:
+
+    $ createuser hascore
+    $ createdb -O hascore hascore
+
+It's recommended to use [Virtualenv](docs.python-guide
+.org/en/latest/dev/virtualenvs/). To install hascore, run:
+
+    $ pip install -r requirements.txt
+
+Run the server with:
+
+    $ python runserver.py
+
+### Usage
+
+Hascore by default runs on port 8070. Access `http://localhost:8070/1/` followed
+by the module you want to query. For example:
+`localhost:8070/1/geo/parse_locations?q=goa`
