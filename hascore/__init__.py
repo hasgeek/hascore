@@ -2,9 +2,9 @@
 
 from functools import partial
 from flask import Flask
-from flask.ext.assets import Bundle
-from flask.ext.lastuser import Lastuser
-from flask.ext.lastuser.sqlalchemy import UserManager
+from flask_assets import Bundle
+from flask_lastuser import Lastuser
+from flask_lastuser.sqlalchemy import UserManager
 from rq_dashboard import RQDashboard
 from baseframe import baseframe, assets
 import coaster.app
