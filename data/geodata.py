@@ -125,23 +125,24 @@ def load_geonames(fd):
     # Feature descriptions: http://download.geonames.org/export/dump/featureCodes_en.txt
     # Sorting order, larger number has more weight
     loadfeatures = {
-        ('L', 'CONT'):  21,  # Continent
-        ('A', 'PCL'):   20,  # Political entity (country)
-        ('A', 'PCLD'):  19,  # Dependent political entity
-        ('A', 'PCLF'):  18,  # Freely associated state
-        ('A', 'PCLI'):  17,  # Independent political entity
-        ('A', 'PCLS'):  16,  # Semi-independent political entity
-        ('A', 'ADM1'):  15,  # First-order administrative division (state, province)
-        ('P', 'PPLC'):  14,  # capital of a political entity
-        ('P', 'PPLA'):  13,  # Seat of a first-order administrative division (state capital)
-        ('P', 'PPLA2'): 12,  # Seat of a second-order administrative division
-        ('P', 'PPLA3'): 11,  # Seat of a third-order administrative division
-        ('P', 'PPLA4'): 10,  # Seat of a fourth-order administrative division
-        ('P', 'PPLG'):   9,  # Seat of government of a political entity
-        ('P', 'PPL'):    8,  # Populated place (city, could be a neighbourhood too)
-        ('P', 'PPLR'):   7,  # Religious populated place
-        ('P', 'PPLS'):   6,  # Populated places
-        ('P', 'PPLX'):   5,  # Section of populated place
+        ('L', 'CONT'):  22,  # Continent
+        ('A', 'PCL'):   21,  # Political entity (country)
+        ('A', 'PCLD'):  20,  # Dependent political entity
+        ('A', 'PCLF'):  19,  # Freely associated state
+        ('A', 'PCLI'):  18,  # Independent political entity
+        ('A', 'PCLS'):  17,  # Semi-independent political entity
+        ('A', 'ADM1'):  16,  # First-order administrative division (state, province)
+        ('P', 'PPLC'):  15,  # capital of a political entity
+        ('P', 'PPLA'):  14,  # Seat of a first-order administrative division (state capital)
+        ('P', 'PPLA2'): 13,  # Seat of a second-order administrative division
+        ('P', 'PPLA3'): 12,  # Seat of a third-order administrative division
+        ('P', 'PPLA4'): 11,  # Seat of a fourth-order administrative division
+        ('P', 'PPLG'):  10,  # Seat of government of a political entity
+        ('P', 'PPL'):    9,  # Populated place (city, could be a neighbourhood too)
+        ('P', 'PPLR'):   8,  # Religious populated place
+        ('P', 'PPLS'):   7,  # Populated places
+        ('P', 'PPLX'):   6,  # Section of populated place
+        ('S', 'TRIG'):   5,  # Triangulated location (shows up in data instead of P.PPL)
         ('P', 'PPLL'):   4,  # Populated locality
         ('P', 'PPLF'):   3,  # Farm village
         ('A', 'ADM2'):   2,  # Second-order administrative division (district, county)
