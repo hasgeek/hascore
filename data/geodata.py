@@ -20,7 +20,6 @@ from progressbar import ProgressBar
 import progressbar.widgets
 from coaster.utils import getbool
 
-from hascore import init_for
 from hascore.models import db, GeoName, GeoCountryInfo, GeoAltName, GeoAdmin1Code, GeoAdmin2Code
 
 
