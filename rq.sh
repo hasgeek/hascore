@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rqworker -c rqdev hascore
+rqworker -c rqinit hascore
