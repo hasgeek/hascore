@@ -21,17 +21,16 @@ from .models import db       # NOQA
 
 
 # Configure the app
-def init_for(env):
-    coaster.app.init_app(app, env)
+coaster.app.init_app(app)
 
-    baseframe.init_app(app, requires=['baseframe'])
-    lastuser.init_app(app)
-    lastuser.init_usermanager(UserManager(models.db, models.User))
-    app.assets.register('js_networkbar',
-        Bundle(assets.require('baseframe-networkbar.js'),
-            filters='closure_js', output='js/baseframe-networkbar.js'))
-    app.assets.register('css_networkbar',
-        Bundle(assets.require('baseframe-networkbar.css'),
-            filters='cssmin', output='css/baseframe-networkbar.css'))
+baseframe.init_app(app, requires=['baseframe'])
+lastuser.init_app(app)
+lastuser.init_usermanager(UserManager(models.db, models.User))
+app.assets.register('js_networkbar',
+    Bundle(assets.require('baseframe-networkbar.js'),
+        filters='closure_js', output='js/baseframe-networkbar.js'))
+app.assets.register('css_networkbar',
+    Bundle(assets.require('baseframe-networkbar.css'),
+        filters='cssmin', output='css/baseframe-networkbar.css'))
 
-    RQDashboard(app, url_prefix='/rq', auth_handler=partial(lastuser.has_permission, 'siteadmin'))
+RQDashboard(app, url_prefix='/rq', auth_handler=partial(lastuser.has_permission, 'siteadmin'))
