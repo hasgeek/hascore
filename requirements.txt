@@ -2,7 +2,6 @@ Flask
 Flask-SQLAlchemy
 Flask-Admin
 git+https://github.com/jace/flask-alembic.git
-Flask-Script==0.5.3
 Flask-RQ
 git+https://github.com/hasgeek/coaster.git
 git+https://github.com/hasgeek/flask-lastuser.git
