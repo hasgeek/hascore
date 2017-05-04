@@ -293,8 +293,7 @@ def load_admin2_codes(fd):
     db.session.commit()
 
 
-def main(env):
-    init_for(env)
+def main():
     for filename in [
             'countryInfo.txt', 'admin1CodesASCII.txt', 'admin2Codes.txt',
             'IN.zip', 'allCountries.zip', 'alternateNames.zip']:
@@ -309,4 +308,4 @@ def main(env):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main()

@@ -1,11 +1,9 @@
 # Load data for networkbar
 
 import sys
-from hascore import init_for
 from hascore.models import db, NetworkLink
 
 if __name__ == '__main__':
-    init_for(sys.argv[1])
 
     db.session.add_all([
         NetworkLink(seq=1, name=u'home', title=u'HasGeek', url=u'http://hasgeek.com/'),
