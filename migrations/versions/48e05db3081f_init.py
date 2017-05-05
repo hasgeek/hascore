@@ -12,6 +12,7 @@ down_revision = None
 
 from alembic import op
 import sqlalchemy as sa
+from coaster.sqlalchemy import JsonDict
 
 
 def upgrade():
@@ -40,7 +41,7 @@ def upgrade():
         sa.Column('lastuser_token', sa.String(length=22), nullable=True),
         sa.Column('fullname', sa.Unicode(length=80), nullable=False),
         sa.Column('email', sa.Unicode(length=80), nullable=True),
-        sa.Column('userinfo', sa.JsonDict(), nullable=True),
+        sa.Column('userinfo', JsonDict(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('email'),
         sa.UniqueConstraint('lastuser_token'),
