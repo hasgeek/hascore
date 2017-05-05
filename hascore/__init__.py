@@ -2,6 +2,7 @@
 
 from functools import partial
 from flask import Flask
+from flask_migrate import Migrate
 from flask_assets import Bundle
 from flask_lastuser import Lastuser
 from flask_lastuser.sqlalchemy import UserManager
@@ -22,6 +23,9 @@ from .models import db       # NOQA
 
 # Configure the app
 coaster.app.init_app(app)
+db.init_app(app)
+db.app = app
+migrate = Migrate(app, db)
 
 baseframe.init_app(app, requires=['baseframe'])
 lastuser.init_app(app)

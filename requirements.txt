@@ -12,3 +12,4 @@ numpy
 requests
 unidecode
 rq-dashboard
+Flask-Migrate
