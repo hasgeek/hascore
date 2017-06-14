@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 export FLASK_ENV="TESTING"
-coverage run `which nosetests` hascore tests
-coverage report
+coverage run `which nosetests` "$@"
+coverage report -m
