@@ -11,5 +11,5 @@ nltk
 numpy
 requests
 unidecode
-rq-dashboard
+rq-dashboard>=0.3.8
 Flask-Migrate

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from functools import partial
-from flask import Flask
+from flask import Flask, abort
 from flask_migrate import Migrate
 from flask_assets import Bundle
 from flask_lastuser import Lastuser
 from flask_lastuser.sqlalchemy import UserManager
-from rq_dashboard import RQDashboard
+import rq_dashboard
 from baseframe import baseframe, assets
 import coaster.app
 
@@ -22,6 +21,7 @@ from .models import db       # NOQA
 
 
 # Configure the app
+app.config.from_object(rq_dashboard.default_settings)
 coaster.app.init_app(app)
 db.init_app(app)
 db.app = app
@@ -37,4 +37,6 @@ app.assets.register('css_networkbar',
     Bundle(assets.require('baseframe-networkbar.css'),
         filters='cssmin', output='css/baseframe-networkbar.css'))
 
-RQDashboard(app, url_prefix='/rq', auth_handler=partial(lastuser.has_permission, 'siteadmin'))
+# RQDashboard(app, url_prefix='/rq', auth_handler=partial(lastuser.has_permission, 'siteadmin'))
+rq_dashboard.blueprint.before_request(lambda: None if lastuser.has_permission('siteadmin') else abort(403))
+app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
