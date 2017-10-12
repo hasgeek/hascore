@@ -1,4 +1,4 @@
-{% from "baseframe/components.html" import networkbar with context -%}
+{% from "baseframe/components.html.jinja2" import networkbar with context -%}
 
 (function(){
   var head = document.getElementsByTagName('head')[0],
