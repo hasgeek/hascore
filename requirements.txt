@@ -8,7 +8,6 @@ git+https://github.com/hasgeek/baseframe.git
 SQLAlchemy>=0.9
 progressbar2==3.38.0
 nltk==3.3
-numpy==1.14.3
 requests==2.19.1
 unidecode==1.0.22
 rq-dashboard>=0.3.8
