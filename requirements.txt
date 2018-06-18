@@ -12,4 +12,4 @@ numpy==1.14.3
 requests==2.18.4
 unidecode==1.0.22
 rq-dashboard>=0.3.8
-Flask-Migrate==2.1.1
+Flask-Migrate==2.2.0
