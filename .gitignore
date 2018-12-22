@@ -26,3 +26,6 @@ data/*.txt
 data/*.csv
 data/*.zip
 data/*.sql
+*.sql
+*.sql.gz
+*.sql.bz2
