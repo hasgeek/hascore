@@ -10,4 +10,4 @@ progressbar2==3.39.3
 nltk==3.4.1
 requests==2.22.0
 unidecode==1.0.23
-Flask-Migrate==2.5.1
+Flask-Migrate==2.5.2
