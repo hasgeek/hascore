@@ -6,7 +6,7 @@ git+https://github.com/hasgeek/coaster.git
 git+https://github.com/hasgeek/flask-lastuser.git
 git+https://github.com/hasgeek/baseframe.git
 SQLAlchemy>=0.9
-progressbar2==3.41.0
+progressbar2==3.42.0
 nltk==3.4.1
 requests==2.22.0
 unidecode==1.0.23
