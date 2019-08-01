@@ -1,4 +1,4 @@
-Flask==1.0.3
+Flask==1.1.1
 Flask-SQLAlchemy==2.4.0
 Flask-Admin==1.5.3
 Flask-RQ==0.2
