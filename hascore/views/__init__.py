@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-from . import login, networkbar, geoname, nlp  # NOQA
+from . import geoname, login, networkbar, nlp

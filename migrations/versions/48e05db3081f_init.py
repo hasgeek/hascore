@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Init
 
 Revision ID: 48e05db3081f
@@ -12,11 +13,13 @@ down_revision = None
 
 from alembic import op
 import sqlalchemy as sa
+
 from coaster.sqlalchemy import JsonDict
 
 
 def upgrade():
-    op.create_table('networklink',
+    op.create_table(
+        'networklink',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -26,11 +29,12 @@ def upgrade():
         sa.Column('parent_id', sa.Integer(), nullable=True),
         sa.Column('name', sa.Unicode(length=250), nullable=False),
         sa.Column('title', sa.Unicode(length=250), nullable=False),
-        sa.ForeignKeyConstraint(['parent_id'], ['networklink.id'], ),
+        sa.ForeignKeyConstraint(['parent_id'], ['networklink.id']),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('name')
-        )
-    op.create_table('user',
+        sa.UniqueConstraint('name'),
+    )
+    op.create_table(
+        'user',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -46,8 +50,8 @@ def upgrade():
         sa.UniqueConstraint('email'),
         sa.UniqueConstraint('lastuser_token'),
         sa.UniqueConstraint('userid'),
-        sa.UniqueConstraint('username')
-        )
+        sa.UniqueConstraint('username'),
+    )
 
 
 def downgrade():

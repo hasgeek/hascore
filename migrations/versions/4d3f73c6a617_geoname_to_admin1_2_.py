@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """GeoName to admin1/2 foreign key references
 
 Revision ID: 4d3f73c6a617

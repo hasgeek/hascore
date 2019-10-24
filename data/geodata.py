@@ -1,82 +1,156 @@
 # -*- coding: utf-8 -*-
 
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
-import os
-
-# Make hascore importable by adding the parent dir to the path
-sys.path.append(os.path.dirname(os.getcwd()))
+from __future__ import print_function
 
 from collections import namedtuple
-from urlparse import urljoin
-import zipfile
-import unicodecsv
-import requests
-from decimal import Decimal
 from datetime import datetime
-from unidecode import unidecode
+from decimal import Decimal
+from urlparse import urljoin
+import sys
+import zipfile
+
 from progressbar import ProgressBar
+from unidecode import unidecode
 import progressbar.widgets
+import requests
+import unicodecsv
+
 from coaster.utils import getbool
-
-from hascore.models import db, GeoName, GeoCountryInfo, GeoAltName, GeoAdmin1Code, GeoAdmin2Code
-
+from hascore.models import (
+    GeoAdmin1Code,
+    GeoAdmin2Code,
+    GeoAltName,
+    GeoCountryInfo,
+    GeoName,
+    db,
+)
 
 unicodecsv.field_size_limit(sys.maxint)
 
 
-CountryInfoRecord = namedtuple('CountryInfoRecord', ['iso_alpha2', 'iso_alpha3', 'iso_numeric',
-    'fips_code', 'title', 'capital', 'area_in_sqkm', 'population', 'continent', 'tld',
-    'currency_code', 'currency_name', 'phone', 'postal_code_format', 'postal_code_regex',
-    'languages', 'geonameid', 'neighbours', 'equivalent_fips_code'])
+CountryInfoRecord = namedtuple(
+    'CountryInfoRecord',
+    [
+        'iso_alpha2',
+        'iso_alpha3',
+        'iso_numeric',
+        'fips_code',
+        'title',
+        'capital',
+        'area_in_sqkm',
+        'population',
+        'continent',
+        'tld',
+        'currency_code',
+        'currency_name',
+        'phone',
+        'postal_code_format',
+        'postal_code_regex',
+        'languages',
+        'geonameid',
+        'neighbours',
+        'equivalent_fips_code',
+    ],
+)
 
 
-GeoNameRecord = namedtuple('GeoNameRecord', ['geonameid', 'title', 'ascii_title', 'alternatenames',
-    'latitude', 'longitude', 'fclass', 'fcode', 'country_id', 'cc2', 'admin1', 'admin2',
-    'admin3', 'admin4', 'population', 'elevation', 'dem', 'timezone', 'moddate'])
+GeoNameRecord = namedtuple(
+    'GeoNameRecord',
+    [
+        'geonameid',
+        'title',
+        'ascii_title',
+        'alternatenames',
+        'latitude',
+        'longitude',
+        'fclass',
+        'fcode',
+        'country_id',
+        'cc2',
+        'admin1',
+        'admin2',
+        'admin3',
+        'admin4',
+        'population',
+        'elevation',
+        'dem',
+        'timezone',
+        'moddate',
+    ],
+)
 
 
-GeoAdminRecord = namedtuple('GeoAdminRecord', ['code', 'title', 'ascii_title', 'geonameid'])
+GeoAdminRecord = namedtuple(
+    'GeoAdminRecord', ['code', 'title', 'ascii_title', 'geonameid']
+)
 
-GeoAltNameRecord = namedtuple('GeoAltNameRecord', ['id', 'geonameid', 'lang', 'title',
-    'is_preferred_name', 'is_short_name', 'is_colloquial', 'is_historic'])
+GeoAltNameRecord = namedtuple(
+    'GeoAltNameRecord',
+    [
+        'id',
+        'geonameid',
+        'lang',
+        'title',
+        'is_preferred_name',
+        'is_short_name',
+        'is_colloquial',
+        'is_historic',
+    ],
+)
 
 
 def get_progressbar():
     return ProgressBar(
-        widgets=[progressbar.widgets.Percentage(), ' ', progressbar.widgets.Bar(), ' ', progressbar.widgets.ETA(), ' '])
+        widgets=[
+            progressbar.widgets.Percentage(),
+            ' ',
+            progressbar.widgets.Bar(),
+            ' ',
+            progressbar.widgets.ETA(),
+            ' ',
+        ]
+    )
 
 
 def downloadfile(basepath, filename):
-    print "Downloading %s..." % filename
+    print("Downloading %s..." % filename)  # NOQA: T001
     url = urljoin(basepath, filename)
     r = requests.get(url, stream=True)
     if r.status_code == 200:
-        progress = ProgressBar(maxval=int(r.headers.get('content-length', 0)),
-            widgets=[progressbar.widgets.Percentage(), ' ',
-                progressbar.widgets.Bar(), ' ',
-                progressbar.widgets.ETA(), ' ']).start()
-        bytes = 0
+        progress = ProgressBar(
+            maxval=int(r.headers.get('content-length', 0)),
+            widgets=[
+                progressbar.widgets.Percentage(),
+                ' ',
+                progressbar.widgets.Bar(),
+                ' ',
+                progressbar.widgets.ETA(),
+                ' ',
+            ],
+        ).start()
+        readbytes = 0
         with open(filename, 'wb') as f:
             for chunk in r.iter_content(1024):
                 if not chunk:
                     break  # Break when done. The connection remains open for Keep-Alive
-                bytes += len(chunk)
+                readbytes += len(chunk)
                 f.write(chunk)
-                progress.update(bytes)
+                progress.update(readbytes)
         progress.finish()
 
         if filename.lower().endswith('.zip'):
-            zip = zipfile.ZipFile(filename, 'r')
-            zip.extractall()
+            zipf = zipfile.ZipFile(filename, 'r')
+            zipf.extractall()
 
 
 def load_country_info(fd):
-    print "Loading country info..."
+    print("Loading country info...")  # NOQA: T001
     progress = get_progressbar()
-    countryinfo = [CountryInfoRecord(*row) for row in unicodecsv.reader(fd, delimiter='\t')
-        if not row[0].startswith('#')]
+    countryinfo = [
+        CountryInfoRecord(*row)
+        for row in unicodecsv.reader(fd, delimiter='\t')
+        if not row[0].startswith('#')
+    ]
 
     GeoCountryInfo.query.all()  # Load everything into session cache
     for item in progress(countryinfo):
@@ -113,40 +187,49 @@ def load_country_info(fd):
 
 def load_geonames(fd):
     progress = get_progressbar()
-    print "Loading geonames..."
+    print("Loading geonames...")  # NOQA: T001
     size = sum(1 for line in fd)
     fd.seek(0)  # Return to start
-    loadprogress = ProgressBar(maxval=size,
-        widgets=[progressbar.widgets.Percentage(), ' ', progressbar.widgets.Bar(), ' ', progressbar.widgets.ETA(), ' ']).start()
+    loadprogress = ProgressBar(
+        maxval=size,
+        widgets=[
+            progressbar.widgets.Percentage(),
+            ' ',
+            progressbar.widgets.Bar(),
+            ' ',
+            progressbar.widgets.ETA(),
+            ' ',
+        ],
+    ).start()
 
     geonames = []
 
     # Feature descriptions: http://download.geonames.org/export/dump/featureCodes_en.txt
     # Sorting order, larger number has more weight
     loadfeatures = {
-        ('L', 'CONT'):  22,  # Continent
-        ('A', 'PCL'):   21,  # Political entity (country)
-        ('A', 'PCLD'):  20,  # Dependent political entity
-        ('A', 'PCLF'):  19,  # Freely associated state
-        ('A', 'PCLI'):  18,  # Independent political entity
-        ('A', 'PCLS'):  17,  # Semi-independent political entity
-        ('A', 'ADM1'):  16,  # First-order administrative division (state, province)
-        ('P', 'PPLC'):  15,  # capital of a political entity
-        ('P', 'PPLA'):  14,  # Seat of a first-order administrative division (state capital)
+        ('L', 'CONT'): 22,  # Continent
+        ('A', 'PCL'): 21,  # Political entity (country)
+        ('A', 'PCLD'): 20,  # Dependent political entity
+        ('A', 'PCLF'): 19,  # Freely associated state
+        ('A', 'PCLI'): 18,  # Independent political entity
+        ('A', 'PCLS'): 17,  # Semi-independent political entity
+        ('A', 'ADM1'): 16,  # First-order administrative division (state, province)
+        ('P', 'PPLC'): 15,  # capital of a political entity
+        ('P', 'PPLA'): 14,  # Seat of a first-order admin. division (state capital)
         ('P', 'PPLA2'): 13,  # Seat of a second-order administrative division
         ('P', 'PPLA3'): 12,  # Seat of a third-order administrative division
         ('P', 'PPLA4'): 11,  # Seat of a fourth-order administrative division
-        ('P', 'PPLG'):  10,  # Seat of government of a political entity
-        ('P', 'PPL'):    9,  # Populated place (city, could be a neighbourhood too)
-        ('P', 'PPLR'):   8,  # Religious populated place
-        ('P', 'PPLS'):   7,  # Populated places
-        ('P', 'PPLX'):   6,  # Section of populated place
-        ('S', 'TRIG'):   5,  # Triangulated location (shows up in data instead of P.PPL)
-        ('P', 'PPLL'):   4,  # Populated locality
-        ('P', 'PPLF'):   3,  # Farm village
-        ('A', 'ADM2'):   2,  # Second-order administrative division (district, county)
-        ('A', 'ADM3'):   1,  # Third-order administrative division
-        }
+        ('P', 'PPLG'): 10,  # Seat of government of a political entity
+        ('P', 'PPL'): 9,  # Populated place (city, could be a neighbourhood too)
+        ('P', 'PPLR'): 8,  # Religious populated place
+        ('P', 'PPLS'): 7,  # Populated places
+        ('P', 'PPLX'): 6,  # Section of populated place
+        ('S', 'TRIG'): 5,  # Triangulated location (shows up in data instead of P.PPL)
+        ('P', 'PPLL'): 4,  # Populated locality
+        ('P', 'PPLF'): 3,  # Farm village
+        ('A', 'ADM2'): 2,  # Second-order administrative division (district, county)
+        ('A', 'ADM3'): 1,  # Third-order administrative division
+    }
 
     for counter, line in enumerate(fd):
         loadprogress.update(counter)
@@ -154,11 +237,16 @@ def load_geonames(fd):
 
         if not line.startswith('#'):
             rec = GeoNameRecord(*line.strip().split('\t'))
-            # Ignore places that have a population below 15,000, but keep places that have a population of 0,
-            # since that indicates data wasn't available
+            # Ignore places that have a population below 15,000, but keep places that
+            # have a population of 0, since that indicates data wasn't available
             if rec.fclass == 'P' and (
-                    (rec.population.isdigit() and int(rec.population != 0) and int(rec.population) < 15000) or
-                    not rec.population.isdigit()):
+                (
+                    rec.population.isdigit()
+                    and int(rec.population != 0)
+                    and int(rec.population) < 15000
+                )
+                or not rec.population.isdigit()
+            ):
                 continue
             if (rec.fclass, rec.fcode) not in loadfeatures:
                 continue
@@ -166,15 +254,25 @@ def load_geonames(fd):
 
     loadprogress.finish()
 
-    print "Sorting %d records..." % len(geonames)
+    print("Sorting %d records..." % len(geonames))  # NOQA: T001
 
-    geonames = [row[2] for row in sorted(
-        [(loadfeatures[(item.fclass, item.fcode)], int(item.population) if item.population else 0, item)
-            for item in geonames],
-        reverse=True)]
+    geonames = [
+        row[2]
+        for row in sorted(
+            (
+                (
+                    loadfeatures[(item.fclass, item.fcode)],
+                    int(item.population) if item.population else 0,
+                    item,
+                )
+                for item in geonames
+            ),
+            reverse=True,
+        )
+    ]
     GeoName.query.all()  # Load all data into session cache for faster lookup
 
-    print "Processing %d records..." % len(geonames)
+    print("Processing %d records..." % len(geonames))  # NOQA: T001
 
     for item in progress(geonames):
         if item.geonameid:
@@ -185,8 +283,9 @@ def load_geonames(fd):
 
             gn.geonameid = int(item.geonameid)
             gn.title = item.title or u''
-            gn.ascii_title = item.ascii_title or unidecode(item.title or u'').replace(u'@', u'a')
-            # gn.alternate_titles = item.alternatenames.split(',') if item.alternatenames else None
+            gn.ascii_title = item.ascii_title or unidecode(item.title or u'').replace(
+                u'@', u'a'
+            )
             gn.latitude = Decimal(item.latitude) or None
             gn.longitude = Decimal(item.longitude) or None
             gn.fclass = item.fclass or None
@@ -203,33 +302,52 @@ def load_geonames(fd):
             gn.elevation = int(item.elevation) if item.elevation else None
             gn.dem = int(item.dem) if item.dem else None
             gn.timezone = item.timezone or None
-            gn.moddate = datetime.strptime(item.moddate, '%Y-%m-%d').date() if item.moddate else None
+            gn.moddate = (
+                datetime.strptime(item.moddate, '%Y-%m-%d').date()
+                if item.moddate
+                else None
+            )
 
             gn.make_name()
-            db.session.flush()  # Required for future make_name() calls to work correctly
+            # Required for future make_name() calls to work correctly
+            db.session.flush()
 
     db.session.commit()
 
 
 def load_alt_names(fd):
     progress = get_progressbar()
-    print "Loading alternate names..."
+    print("Loading alternate names...")  # NOQA: T001
     size = sum(1 for line in fd)
     fd.seek(0)  # Return to start
-    loadprogress = ProgressBar(maxval=size,
-        widgets=[progressbar.widgets.Percentage(), ' ', progressbar.widgets.Bar(), ' ', progressbar.widgets.ETA(), ' ']).start()
+    loadprogress = ProgressBar(
+        maxval=size,
+        widgets=[
+            progressbar.widgets.Percentage(),
+            ' ',
+            progressbar.widgets.Bar(),
+            ' ',
+            progressbar.widgets.ETA(),
+            ' ',
+        ],
+    ).start()
 
     def update_progress(counter):
         loadprogress.update(counter + 1)
         return True
 
-    geonameids = set([r[0] for r in db.session.query(GeoName.id).all()])
-    altnames = [GeoAltNameRecord(*row) for counter, row in enumerate(unicodecsv.reader(fd, delimiter='\t'))
-        if update_progress(counter) and not row[0].startswith('#') and int(row[1]) in geonameids]
+    geonameids = {r[0] for r in db.session.query(GeoName.id).all()}
+    altnames = [
+        GeoAltNameRecord(*row)
+        for counter, row in enumerate(unicodecsv.reader(fd, delimiter='\t'))
+        if update_progress(counter)
+        and not row[0].startswith('#')
+        and int(row[1]) in geonameids
+    ]
 
     loadprogress.finish()
 
-    print "Processing %d records..." % len(altnames)
+    print("Processing %d records..." % len(altnames))  # NOQA: T001
     GeoAltName.query.all()  # Load all data into session cache for faster lookup
 
     for item in progress(altnames):
@@ -251,10 +369,13 @@ def load_alt_names(fd):
 
 
 def load_admin1_codes(fd):
-    print "Loading admin1 codes..."
+    print("Loading admin1 codes...")  # NOQA: T001
     progress = get_progressbar()
-    admincodes = [GeoAdminRecord(*row) for row in unicodecsv.reader(fd, delimiter='\t')
-        if not row[0].startswith('#')]
+    admincodes = [
+        GeoAdminRecord(*row)
+        for row in unicodecsv.reader(fd, delimiter='\t')
+        if not row[0].startswith('#')
+    ]
 
     GeoAdmin1Code.query.all()  # Load all data into session cache for faster lookup
     for item in progress(admincodes):
@@ -272,10 +393,13 @@ def load_admin1_codes(fd):
 
 
 def load_admin2_codes(fd):
-    print "Loading admin2 codes..."
+    print("Loading admin2 codes...")  # NOQA: T001
     progress = get_progressbar()
-    admincodes = [GeoAdminRecord(*row) for row in unicodecsv.reader(fd, delimiter='\t')
-        if not row[0].startswith('#')]
+    admincodes = [
+        GeoAdminRecord(*row)
+        for row in unicodecsv.reader(fd, delimiter='\t')
+        if not row[0].startswith('#')
+    ]
 
     GeoAdmin2Code.query.all()  # Load all data into session cache for faster lookup
     for item in progress(admincodes):
@@ -293,9 +417,14 @@ def load_admin2_codes(fd):
 
 
 def main():
-    for filename in [
-            'countryInfo.txt', 'admin1CodesASCII.txt', 'admin2Codes.txt',
-            'IN.zip', 'allCountries.zip', 'alternateNames.zip']:
+    for filename in (
+        'countryInfo.txt',
+        'admin1CodesASCII.txt',
+        'admin2Codes.txt',
+        'IN.zip',
+        'allCountries.zip',
+        'alternateNames.zip',
+    ):
         downloadfile('http://download.geonames.org/export/dump/', filename)
 
     load_country_info(open('countryInfo.txt'))

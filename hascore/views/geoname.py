@@ -2,6 +2,7 @@
 
 from coaster.utils import getbool
 from coaster.views import jsonp, requestargs
+
 from .. import app
 from ..models import GeoName
 
@@ -13,8 +14,16 @@ def geo_get_by_name(name, related=False, alternate_titles=False):
         geoname = GeoName.query.get(int(name))
     else:
         geoname = GeoName.get(name)
-    return jsonp({'status': 'ok', 'result': geoname.as_dict(related=related, alternate_titles=alternate_titles)}
-        if geoname else {'status': 'error', 'error': 'not_found'})
+    return jsonp(
+        {
+            'status': 'ok',
+            'result': geoname.as_dict(
+                related=related, alternate_titles=alternate_titles
+            ),
+        }
+        if geoname
+        else {'status': 'error', 'error': 'not_found'}
+    )
 
 
 @app.route('/1/geo/get_by_names')
@@ -28,16 +37,26 @@ def geo_get_by_names(name, related=False, alternate_titles=False):
             geoname = GeoName.get(n)
         if geoname:
             geonames.append(geoname)
-    return jsonp({
-        'status': 'ok',
-        'result': [gn.as_dict(related=related, alternate_titles=alternate_titles) for gn in geonames]
-        })
+    return jsonp(
+        {
+            'status': 'ok',
+            'result': [
+                gn.as_dict(related=related, alternate_titles=alternate_titles)
+                for gn in geonames
+            ],
+        }
+    )
 
 
 @app.route('/1/geo/get_by_title')
 @requestargs('title[]', 'lang')
 def geo_get_by_title(title, lang=None):
-    return jsonp({'status': 'ok', 'result': [g.as_dict() for g in GeoName.get_by_title(title, lang)]})
+    return jsonp(
+        {
+            'status': 'ok',
+            'result': [g.as_dict() for g in GeoName.get_by_title(title, lang)],
+        }
+    )
 
 
 @app.route('/1/geo/parse_locations')
@@ -53,8 +72,12 @@ def geo_parse_location(q, special=[], lang=None, bias=[], alternate_titles=False
 @app.route('/1/geo/autocomplete')
 @requestargs('q', 'lang', ('limit', int))
 def geo_autocomplete(q, lang=None, limit=100):
-    return jsonp({
-        'status': 'ok',
-        'result': [g.as_dict(related=False, alternate_titles=False)
-            for g in GeoName.autocomplete(q, lang).limit(limit)]
-        })
+    return jsonp(
+        {
+            'status': 'ok',
+            'result': [
+                g.as_dict(related=False, alternate_titles=False)
+                for g in GeoName.autocomplete(q, lang).limit(limit)
+            ],
+        }
+    )

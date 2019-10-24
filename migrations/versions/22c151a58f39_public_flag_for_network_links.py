@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Public flag for network links
 
 Revision ID: 22c151a58f39
@@ -15,7 +16,10 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('networklink', sa.Column('public', sa.Boolean(), nullable=False, server_default="1"))
+    op.add_column(
+        'networklink',
+        sa.Column('public', sa.Boolean(), nullable=False, server_default="1"),
+    )
     op.alter_column('networklink', 'public', server_default=None)
 
 

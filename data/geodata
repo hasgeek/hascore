@@ -1,0 +1,5 @@
+#!/bin/sh
+export PYTHONPATH=`dirname "$0"`
+export PYTHONIOENCODING="UTF-8"
+cd `dirname "$0"`
+python geodata.py "$@"

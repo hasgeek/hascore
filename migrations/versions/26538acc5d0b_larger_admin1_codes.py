@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Larger admin1 codes
 
 Revision ID: 26538acc5d0b
@@ -15,10 +16,30 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.alter_column('geo_admin1_code', 'admin1_code', type_=sa.Unicode(8), existing_type=sa.Unicode(7))
-    op.alter_column('geo_admin2_code', 'admin1_code', type_=sa.Unicode(8), existing_type=sa.Unicode(7))
+    op.alter_column(
+        'geo_admin1_code',
+        'admin1_code',
+        type_=sa.Unicode(8),
+        existing_type=sa.Unicode(7),
+    )
+    op.alter_column(
+        'geo_admin2_code',
+        'admin1_code',
+        type_=sa.Unicode(8),
+        existing_type=sa.Unicode(7),
+    )
 
 
 def downgrade():
-    op.alter_column('geo_admin2_code', 'admin1_code', type_=sa.Unicode(7), existing_type=sa.Unicode(8))
-    op.alter_column('geo_admin1_code', 'admin1_code', type_=sa.Unicode(7), existing_type=sa.Unicode(8))
+    op.alter_column(
+        'geo_admin2_code',
+        'admin1_code',
+        type_=sa.Unicode(7),
+        existing_type=sa.Unicode(8),
+    )
+    op.alter_column(
+        'geo_admin1_code',
+        'admin1_code',
+        type_=sa.Unicode(7),
+        existing_type=sa.Unicode(8),
+    )

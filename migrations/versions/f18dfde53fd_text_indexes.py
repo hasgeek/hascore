@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Text indexes
 
 Revision ID: f18dfde53fd
@@ -15,15 +16,28 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.execute(sa.DDL(
-        "CREATE INDEX ix_geo_country_info_title ON geo_country_info (lower(title) text_pattern_ops);"))
-    op.execute(sa.DDL(
-        "CREATE INDEX ix_geo_name_title ON geo_name (lower(title) text_pattern_ops);"))
-    op.execute(sa.DDL(
-        "CREATE INDEX ix_geo_name_ascii_title ON geo_name (lower(ascii_title) text_pattern_ops);"))
-    op.execute(sa.DDL(
-        "CREATE INDEX ix_geo_alt_name_title ON geo_alt_name (lower(title) text_pattern_ops);"))
+    op.execute(
+        sa.DDL(
+            "CREATE INDEX ix_geo_country_info_title ON geo_country_info (lower(title) text_pattern_ops);"
+        )
+    )
+    op.execute(
+        sa.DDL(
+            "CREATE INDEX ix_geo_name_title ON geo_name (lower(title) text_pattern_ops);"
+        )
+    )
+    op.execute(
+        sa.DDL(
+            "CREATE INDEX ix_geo_name_ascii_title ON geo_name (lower(ascii_title) text_pattern_ops);"
+        )
+    )
+    op.execute(
+        sa.DDL(
+            "CREATE INDEX ix_geo_alt_name_title ON geo_alt_name (lower(title) text_pattern_ops);"
+        )
+    )
     op.create_index('ix_geo_alt_name_lang', 'geo_alt_name', ['lang'])
+
 
 def downgrade():
     op.drop_index('ix_geo_alt_name_lang')
