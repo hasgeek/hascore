@@ -51,16 +51,16 @@ class GeoCountryInfo(BaseNameMixin, db.Model):
     iso_alpha3 = db.Column(db.CHAR(3), unique=True)
     iso_numeric = db.Column(db.Integer)
     fips_code = db.Column(db.Unicode(3))
-    capital = db.Column(db.Unicode(200))
+    capital = db.Column(db.UnicodeText)
     area_in_sqkm = db.Column(db.Numeric)
     population = db.Column(db.BigInteger)
     continent = db.Column(db.CHAR(2))
     tld = db.Column(db.Unicode(3))
     currency_code = db.Column(db.CHAR(3))
-    currency_name = db.Column(db.Unicode(13))
+    currency_name = db.Column(db.UnicodeText)
     phone = db.Column(db.Unicode(16))
-    postal_code_format = db.Column(db.Unicode(55))
-    postal_code_regex = db.Column(db.Unicode(155))
+    postal_code_format = db.Column(db.UnicodeText)
+    postal_code_regex = db.Column(db.UnicodeText)
     languages = db.Column(ARRAY(db.Unicode(7), dimensions=1))
     neighbours = db.Column(ARRAY(db.CHAR(2), dimensions=1))
     equivalent_fips_code = db.Column(db.Unicode(3))
@@ -79,13 +79,13 @@ class GeoAdmin1Code(BaseMixin, db.Model):
         primaryjoin='GeoAdmin1Code.id == foreign(GeoName.id)',
         backref='has_admin1code',
     )
-    title = db.Column(db.Unicode(200))
-    ascii_title = db.Column(db.Unicode(200))
+    title = db.Column(db.UnicodeText)
+    ascii_title = db.Column(db.UnicodeText)
     country_id = db.Column(
         'country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2')
     )
     country = db.relationship('GeoCountryInfo')
-    admin1_code = db.Column(db.Unicode(8))
+    admin1_code = db.Column(db.UnicodeText)
 
     def __repr__(self):
         return '<GeoAdmin1Code %d "%s">' % (self.geonameid, self.ascii_title)
@@ -101,14 +101,14 @@ class GeoAdmin2Code(BaseMixin, db.Model):
         primaryjoin='GeoAdmin2Code.id == foreign(GeoName.id)',
         backref='has_admin2code',
     )
-    title = db.Column(db.Unicode(200))
-    ascii_title = db.Column(db.Unicode(200))
+    title = db.Column(db.UnicodeText)
+    ascii_title = db.Column(db.UnicodeText)
     country_id = db.Column(
         'country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2')
     )
     country = db.relationship('GeoCountryInfo')
-    admin1_code = db.Column(db.Unicode(8))
-    admin2_code = db.Column(db.Unicode(23))
+    admin1_code = db.Column(db.UnicodeText)
+    admin2_code = db.Column(db.UnicodeText)
 
     def __repr__(self):
         return '<GeoAdmin2Code %d "%s">' % (self.geonameid, self.ascii_title)
@@ -118,17 +118,17 @@ class GeoName(BaseNameMixin, db.Model):
     __tablename__ = 'geo_name'
 
     geonameid = db.synonym('id')
-    ascii_title = db.Column(db.String(200))
+    ascii_title = db.Column(db.UnicodeText)
     latitude = db.Column(db.Numeric)
     longitude = db.Column(db.Numeric)
     fclass = db.Column(db.CHAR(1))
-    fcode = db.Column(db.Unicode(10))
+    fcode = db.Column(db.UnicodeText)
     country_id = db.Column(
         'country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2')
     )
     country = db.relationship('GeoCountryInfo')
-    cc2 = db.Column(db.Unicode(60))
-    admin1 = db.Column(db.Unicode(20))
+    cc2 = db.Column(db.UnicodeText)
+    admin1 = db.Column(db.UnicodeText)
     admin1_ref = db.relationship(
         'GeoAdmin1Code',
         uselist=False,
@@ -140,7 +140,7 @@ class GeoName(BaseNameMixin, db.Model):
         'GeoAdmin1Code', uselist=False, foreign_keys=[admin1_id]
     )
 
-    admin2 = db.Column(db.Unicode(80))
+    admin2 = db.Column(db.UnicodeText)
     admin2_ref = db.relationship(
         'GeoAdmin2Code',
         uselist=False,
@@ -153,12 +153,12 @@ class GeoName(BaseNameMixin, db.Model):
         'GeoAdmin2Code', uselist=False, foreign_keys=[admin2_id]
     )
 
-    admin3 = db.Column(db.Unicode(20))
-    admin4 = db.Column(db.Unicode(20))
+    admin4 = db.Column(db.UnicodeText)
+    admin3 = db.Column(db.UnicodeText)
     population = db.Column(db.BigInteger)
     elevation = db.Column(db.Integer)
     dem = db.Column(db.Integer)  # Digital Elevation Model
-    timezone = db.Column(db.Unicode(40))
+    timezone = db.Column(db.UnicodeText)
     moddate = db.Column(db.Date)
 
     @property
@@ -477,8 +477,8 @@ class GeoAltName(BaseMixin, db.Model):
     geoname = db.relationship(
         GeoName, backref=db.backref('alternate_titles', cascade='all, delete-orphan')
     )
-    lang = db.Column(db.Unicode(7), nullable=True, index=True)
-    title = db.Column(db.Unicode(200), nullable=False)
+    lang = db.Column(db.UnicodeText, nullable=True, index=True)
+    title = db.Column(db.UnicodeText, nullable=False)
     is_preferred_name = db.Column(db.Boolean, nullable=False)
     is_short_name = db.Column(db.Boolean, nullable=False)
     is_colloquial = db.Column(db.Boolean, nullable=False)
