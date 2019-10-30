@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 from hascore import app, views
+
 with app.test_request_context():
     views.networkbar.cache_networkbar_links()
 

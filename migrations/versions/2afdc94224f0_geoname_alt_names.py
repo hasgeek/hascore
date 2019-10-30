@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Geoname alt names
 
 Revision ID: 2afdc94224f0
@@ -11,11 +12,13 @@ revision = '2afdc94224f0'
 down_revision = '4f1edd208ea5'
 
 from alembic import op
-import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+import sqlalchemy as sa
+
 
 def upgrade():
-    op.create_table('geo_alt_name',
+    op.create_table(
+        'geo_alt_name',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -26,12 +29,17 @@ def upgrade():
         sa.Column('is_short_name', sa.Boolean(), nullable=False),
         sa.Column('is_colloquial', sa.Boolean(), nullable=False),
         sa.Column('is_historic', sa.Boolean(), nullable=False),
-        sa.ForeignKeyConstraint(['geonameid'], ['geo_name.id'], ),
-        sa.PrimaryKeyConstraint('id')
-        )
+        sa.ForeignKeyConstraint(['geonameid'], ['geo_name.id']),
+        sa.PrimaryKeyConstraint('id'),
+    )
     op.drop_column(u'geo_name', 'alternate_titles')
 
 
 def downgrade():
-    op.add_column(u'geo_name', sa.Column('alternate_titles', postgresql.ARRAY(sa.VARCHAR(length=200)), nullable=True))
+    op.add_column(
+        u'geo_name',
+        sa.Column(
+            'alternate_titles', postgresql.ARRAY(sa.VARCHAR(length=200)), nullable=True
+        ),
+    )
     op.drop_table('geo_alt_name')

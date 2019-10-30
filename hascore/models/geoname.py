@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import re
+
+from sqlalchemy import DDL, event
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import joinedload
-from sqlalchemy import DDL, event
+
 from coaster.utils import make_name
-from . import db, BaseMixin, BaseNameMixin
+
+from . import BaseMixin, BaseNameMixin, db
 
 __all__ = ['GeoName', 'GeoCountryInfo', 'GeoAdmin1Code', 'GeoAdmin2Code', 'GeoAltName']
 
@@ -21,20 +24,29 @@ continent_codes = {
     'OC': 6255151,
     'SA': 6255150,
     'AN': 6255152,
-    }
+}
 
 
 def filtlike(q):
-    return q.replace(u'%', ur'\%').replace(u'_', ur'\_').replace(u'[', u'').replace(u']', u'') + u'%'
+    return (
+        q.replace(u'%', ur'\%')
+        .replace(u'_', ur'\_')
+        .replace(u'[', u'')
+        .replace(u']', u'')
+        + u'%'
+    )
 
 
 class GeoCountryInfo(BaseNameMixin, db.Model):
     __tablename__ = 'geo_country_info'
 
     geonameid = db.synonym('id')
-    geoname = db.relationship('GeoName', uselist=False,
+    geoname = db.relationship(
+        'GeoName',
+        uselist=False,
         primaryjoin='GeoCountryInfo.id == foreign(GeoName.id)',
-        backref='has_country')
+        backref='has_country',
+    )
     iso_alpha2 = db.Column(db.CHAR(2), unique=True)
     iso_alpha3 = db.Column(db.CHAR(3), unique=True)
     iso_numeric = db.Column(db.Integer)
@@ -61,12 +73,17 @@ class GeoAdmin1Code(BaseMixin, db.Model):
     __tablename__ = 'geo_admin1_code'
 
     geonameid = db.synonym('id')
-    geoname = db.relationship('GeoName', uselist=False,
+    geoname = db.relationship(
+        'GeoName',
+        uselist=False,
         primaryjoin='GeoAdmin1Code.id == foreign(GeoName.id)',
-        backref='has_admin1code')
+        backref='has_admin1code',
+    )
     title = db.Column(db.Unicode(200))
     ascii_title = db.Column(db.Unicode(200))
-    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
+    country_id = db.Column(
+        'country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2')
+    )
     country = db.relationship('GeoCountryInfo')
     admin1_code = db.Column(db.Unicode(8))
 
@@ -78,12 +95,17 @@ class GeoAdmin2Code(BaseMixin, db.Model):
     __tablename__ = 'geo_admin2_code'
 
     geonameid = db.synonym('id')
-    geoname = db.relationship('GeoName', uselist=False,
+    geoname = db.relationship(
+        'GeoName',
+        uselist=False,
         primaryjoin='GeoAdmin2Code.id == foreign(GeoName.id)',
-        backref='has_admin2code')
+        backref='has_admin2code',
+    )
     title = db.Column(db.Unicode(200))
     ascii_title = db.Column(db.Unicode(200))
-    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
+    country_id = db.Column(
+        'country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2')
+    )
     country = db.relationship('GeoCountryInfo')
     admin1_code = db.Column(db.Unicode(8))
     admin2_code = db.Column(db.Unicode(23))
@@ -101,23 +123,35 @@ class GeoName(BaseNameMixin, db.Model):
     longitude = db.Column(db.Numeric)
     fclass = db.Column(db.CHAR(1))
     fcode = db.Column(db.Unicode(10))
-    country_id = db.Column('country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2'))
+    country_id = db.Column(
+        'country', db.CHAR(2), db.ForeignKey('geo_country_info.iso_alpha2')
+    )
     country = db.relationship('GeoCountryInfo')
     cc2 = db.Column(db.Unicode(60))
     admin1 = db.Column(db.Unicode(20))
-    admin1_ref = db.relationship('GeoAdmin1Code', uselist=False,
+    admin1_ref = db.relationship(
+        'GeoAdmin1Code',
+        uselist=False,
         primaryjoin='and_(GeoName.country_id == foreign(GeoAdmin1Code.country_id), '
-            'GeoName.admin1 == foreign(GeoAdmin1Code.admin1_code))')
+        'GeoName.admin1 == foreign(GeoAdmin1Code.admin1_code))',
+    )
     admin1_id = db.Column(None, db.ForeignKey('geo_admin1_code.id'), nullable=True)
-    admin1code = db.relationship('GeoAdmin1Code', uselist=False, foreign_keys=[admin1_id])
+    admin1code = db.relationship(
+        'GeoAdmin1Code', uselist=False, foreign_keys=[admin1_id]
+    )
 
     admin2 = db.Column(db.Unicode(80))
-    admin2_ref = db.relationship('GeoAdmin2Code', uselist=False,
+    admin2_ref = db.relationship(
+        'GeoAdmin2Code',
+        uselist=False,
         primaryjoin='and_(GeoName.country_id == foreign(GeoAdmin2Code.country_id), '
-            'GeoName.admin1 == foreign(GeoAdmin2Code.admin1_code), '
-            'GeoName.admin2 == foreign(GeoAdmin2Code.admin2_code))')
+        'GeoName.admin1 == foreign(GeoAdmin2Code.admin1_code), '
+        'GeoName.admin2 == foreign(GeoAdmin2Code.admin2_code))',
+    )
     admin2_id = db.Column(None, db.ForeignKey('geo_admin2_code.id'), nullable=True)
-    admin2code = db.relationship('GeoAdmin2Code', uselist=False, foreign_keys=[admin2_id])
+    admin2code = db.relationship(
+        'GeoAdmin2Code', uselist=False, foreign_keys=[admin2_id]
+    )
 
     admin3 = db.Column(db.Unicode(20))
     admin4 = db.Column(db.Unicode(20))
@@ -194,24 +228,46 @@ class GeoName(BaseNameMixin, db.Model):
             elif u'of' in usetitle:
                 usetitle = usetitle.split(u'of')[-1].strip()
         elif self.fclass == u'A' and self.fcode == 'ADM1':
-            usetitle = usetitle.replace(u'State of', '').replace(u'Union Territory of', '').strip()
+            usetitle = (
+                usetitle.replace(u'State of', '')
+                .replace(u'Union Territory of', '')
+                .strip()
+            )
         return usetitle
 
     def make_name(self, reserved=[]):
         if self.ascii_title:
             usetitle = self.use_title
             if self.id:
+
                 def checkused(c):
-                    return bool(c in reserved or
-                        GeoName.query.filter(GeoName.id != self.id).filter_by(name=c).notempty())
+                    return bool(
+                        c in reserved
+                        or GeoName.query.filter(GeoName.id != self.id)
+                        .filter_by(name=c)
+                        .notempty()
+                    )
+
             else:
+
                 def checkused(c):
-                    return bool(c in reserved or GeoName.query.filter_by(name=c).notempty())
+                    return bool(
+                        c in reserved or GeoName.query.filter_by(name=c).notempty()
+                    )
+
             with db.session.no_autoflush:
-                self.name = unicode(make_name(usetitle, maxlength=250, checkused=checkused))
+                self.name = unicode(
+                    make_name(usetitle, maxlength=250, checkused=checkused)
+                )
 
     def __repr__(self):
-        return '<GeoName %d %s %s %s "%s">' % (self.geonameid, self.country_id, self.fclass, self.fcode, self.ascii_title)
+        return '<GeoName %d %s %s %s "%s">' % (
+            self.geonameid,
+            self.country_id,
+            self.fclass,
+            self.fcode,
+            self.ascii_title,
+        )
 
     def related_geonames(self):
         related = {}
@@ -222,7 +278,9 @@ class GeoName(BaseNameMixin, db.Model):
         if self.country and self.country.geonameid != self.geonameid:
             related['country'] = self.country.geoname
         if (self.fclass, self.fcode) != (u'L', u'CONT') and self.country:
-            related['continent'] = GeoName.query.get(continent_codes[self.country.continent])
+            related['continent'] = GeoName.query.get(
+                continent_codes[self.country.continent]
+            )
         return related
 
     def as_dict(self, related=True, alternate_titles=True):
@@ -253,10 +311,16 @@ class GeoName(BaseNameMixin, db.Model):
             'dem': self.dem,
             'timezone': self.timezone,
             'moddate': self.moddate.strftime('%Y-%m-%d') if self.moddate else None,
-            'related': {k: v.as_dict(related=False, alternate_titles=False)
-                for (k, v) in self.related_geonames().items()} if related else {},
-            'alternate_titles': [a.as_dict() for a in self.alternate_titles] if alternate_titles else []
+            'related': {
+                k: v.as_dict(related=False, alternate_titles=False)
+                for (k, v) in self.related_geonames().items()
             }
+            if related
+            else {},
+            'alternate_titles': [a.as_dict() for a in self.alternate_titles]
+            if alternate_titles
+            else [],
+        }
 
     @classmethod
     def get(cls, name):
@@ -269,12 +333,31 @@ class GeoName(BaseNameMixin, db.Model):
             titles = [titles]
         for title in titles:
             if lang:
-                results.update([r.geoname for r in GeoAltName.query.filter(
-                    db.func.lower(GeoAltName.title) == title.lower(), GeoAltName.lang == lang).all() if r.geoname])
+                results.update(
+                    [
+                        r.geoname
+                        for r in GeoAltName.query.filter(
+                            db.func.lower(GeoAltName.title) == title.lower(),
+                            GeoAltName.lang == lang,
+                        ).all()
+                        if r.geoname
+                    ]
+                )
             else:
-                results.update([r.geoname for r in GeoAltName.query.filter(
-                    db.func.lower(GeoAltName.title) == title.lower()).all() if r.geoname])
-        return sorted(list(results), key=lambda g: ({'A': 1, 'P': 2}.get(g.fclass, 0), g.population), reverse=True)
+                results.update(
+                    [
+                        r.geoname
+                        for r in GeoAltName.query.filter(
+                            db.func.lower(GeoAltName.title) == title.lower()
+                        ).all()
+                        if r.geoname
+                    ]
+                )
+        return sorted(
+            list(results),
+            key=lambda g: ({'A': 1, 'P': 2}.get(g.fclass, 0), g.population),
+            reverse=True,
+        )
 
     @classmethod
     def parse_locations(cls, q, special=[], lang=None, bias=[]):
@@ -302,39 +385,66 @@ class GeoName(BaseNameMixin, db.Model):
             if ltoken not in ('or', 'in', 'to', 'the') and WORDS_RE.match(token):
                 # Find a GeoAltName matching token, add GeoAltName.geoname to results
                 if lang:
-                    matches = GeoAltName.query.filter(
-                        db.func.lower(GeoAltName.title).like(filtlike(ltoken))).filter(
-                        db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)).options(  # NOQA
+                    matches = (
+                        GeoAltName.query.filter(
+                            db.func.lower(GeoAltName.title).like(filtlike(ltoken))
+                        )
+                        .filter(
+                            db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)
+                        )
+                        .options(  # NOQA
                             joinedload('geoname').joinedload('country'),
                             joinedload('geoname').joinedload('admin1code'),
-                            joinedload('geoname').joinedload('admin2code')).all()
+                            joinedload('geoname').joinedload('admin2code'),
+                        )
+                        .all()
+                    )
                 else:
-                    matches = GeoAltName.query.filter(
-                        db.func.lower(GeoAltName.title).like(filtlike(ltoken))).options(
+                    matches = (
+                        GeoAltName.query.filter(
+                            db.func.lower(GeoAltName.title).like(filtlike(ltoken))
+                        )
+                        .options(
                             joinedload('geoname').joinedload('country'),
                             joinedload('geoname').joinedload('admin1code'),
-                            joinedload('geoname').joinedload('admin2code')).all()
+                            joinedload('geoname').joinedload('admin2code'),
+                        )
+                        .all()
+                    )
                 if not matches:
                     # This token didn't match anything, move on
                     results.append({'token': token})
                 else:
                     # Now filter through the matches to see if there are exact matches
-                    candidates = [(NOWORDS_RE.split(m.title.lower()), m) for m in matches]
+                    candidates = [
+                        (NOWORDS_RE.split(m.title.lower()), m) for m in matches
+                    ]
                     fullmatch = []
                     for mtokens, match in candidates:
-                        if mtokens == ltokens[counter:counter + len(mtokens)]:
+                        if mtokens == ltokens[counter : counter + len(mtokens)]:
                             fullmatch.append((len(mtokens), match))
                     if fullmatch:
                         maxmatch = max(f[0] for f in fullmatch)
-                        accepted = list(set([f[1] for f in fullmatch if f[0] == maxmatch]))
+                        accepted = list({f[1] for f in fullmatch if f[0] == maxmatch})
                         # Filter accepted down to one match.
                         # Sort by (a) bias, (b) language match, (c) city over state and (d) population
                         accepted.sort(
-                            key=lambda a: (dict([(v, k) for k, v in enumerate(reversed(bias))]).get(a.geoname.country_id, -1),
+                            key=lambda a: (
+                                {v: k for k, v in enumerate(reversed(bias))}.get(
+                                    a.geoname.country_id, -1
+                                ),
                                 {lang: 0}.get(a.lang, 1),
                                 {'A': 1, 'P': 2}.get(a.geoname.fclass, 0),
-                                a.geoname.population), reverse=True)
-                        results.append({'token': ''.join(tokens[counter:counter + maxmatch]), 'geoname': accepted[0].geoname})
+                                a.geoname.population,
+                            ),
+                            reverse=True,
+                        )
+                        results.append(
+                            {
+                                'token': ''.join(tokens[counter : counter + maxmatch]),
+                                'geoname': accepted[0].geoname,
+                            }
+                        )
                         counter += maxmatch - 1
                     else:
                         results.append({'token': token})
@@ -348,10 +458,15 @@ class GeoName(BaseNameMixin, db.Model):
 
     @classmethod
     def autocomplete(cls, q, lang=None):
-        query = cls.query.join(cls.alternate_titles).filter(db.func.lower(GeoAltName.title).like(filtlike(q.lower()))
-            ).order_by(db.desc(cls.population))
+        query = (
+            cls.query.join(cls.alternate_titles)
+            .filter(db.func.lower(GeoAltName.title).like(filtlike(q.lower())))
+            .order_by(db.desc(cls.population))
+        )
         if lang:
-            query = query.filter(db.or_(GeoAltName.lang == None, GeoAltName.lang == lang))  # NOQA
+            query = query.filter(
+                db.or_(GeoAltName.lang == None, GeoAltName.lang == lang)
+            )  # NOQA
         return query
 
 
@@ -359,7 +474,9 @@ class GeoAltName(BaseMixin, db.Model):
     __tablename__ = 'geo_alt_name'
 
     geonameid = db.Column(None, db.ForeignKey('geo_name.id'), nullable=False)
-    geoname = db.relationship(GeoName, backref=db.backref('alternate_titles', cascade='all, delete-orphan'))
+    geoname = db.relationship(
+        GeoName, backref=db.backref('alternate_titles', cascade='all, delete-orphan')
+    )
     lang = db.Column(db.Unicode(7), nullable=True, index=True)
     title = db.Column(db.Unicode(200), nullable=False)
     is_preferred_name = db.Column(db.Boolean, nullable=False)
@@ -368,7 +485,11 @@ class GeoAltName(BaseMixin, db.Model):
     is_historic = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
-        return '<GeoAltName %s "%s" of %s>' % (self.lang, self.title, repr(self.geoname)[1:-1] if self.geoname else None)
+        return '<GeoAltName %s "%s" of %s>' % (
+            self.lang,
+            self.title,
+            repr(self.geoname)[1:-1] if self.geoname else None,
+        )
 
     def as_dict(self):
         return {
@@ -379,21 +500,33 @@ class GeoAltName(BaseMixin, db.Model):
             'is_short_name': self.is_short_name,
             'is_colloquial': self.is_colloquial,
             'is_historic': self.is_historic,
-            }
+        }
 
 
 create_geo_country_info_index = DDL(
-    "CREATE INDEX ix_geo_country_info_title ON geo_country_info (lower(title) varchar_pattern_ops);")
-event.listen(GeoCountryInfo.__table__, 'after_create',
-    create_geo_country_info_index.execute_if(dialect='postgresql'))
+    "CREATE INDEX ix_geo_country_info_title ON geo_country_info (lower(title) varchar_pattern_ops);"
+)
+event.listen(
+    GeoCountryInfo.__table__,
+    'after_create',
+    create_geo_country_info_index.execute_if(dialect='postgresql'),
+)
 
 create_geo_name_index = DDL(
     "CREATE INDEX ix_geo_name_title ON geo_name (lower(title) varchar_pattern_ops); "
-    "CREATE INDEX ix_geo_name_ascii_title ON geo_name (lower(ascii_title) varchar_pattern_ops);")
-event.listen(GeoName.__table__, 'after_create',
-    create_geo_name_index.execute_if(dialect='postgresql'))
+    "CREATE INDEX ix_geo_name_ascii_title ON geo_name (lower(ascii_title) varchar_pattern_ops);"
+)
+event.listen(
+    GeoName.__table__,
+    'after_create',
+    create_geo_name_index.execute_if(dialect='postgresql'),
+)
 
 create_geo_alt_name_index = DDL(
-    "CREATE INDEX ix_geo_alt_name_title ON geo_alt_name (lower(title) varchar_pattern_ops);")
-event.listen(GeoAltName.__table__, 'after_create',
-    create_geo_alt_name_index.execute_if(dialect='postgresql'))
+    "CREATE INDEX ix_geo_alt_name_title ON geo_alt_name (lower(title) varchar_pattern_ops);"
+)
+event.listen(
+    GeoAltName.__table__,
+    'after_create',
+    create_geo_alt_name_index.execute_if(dialect='postgresql'),
+)

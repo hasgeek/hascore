@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Geoname
 
 Revision ID: 360b99aa4993
@@ -11,11 +12,13 @@ revision = '360b99aa4993'
 down_revision = '48e05db3081f'
 
 from alembic import op
-import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+import sqlalchemy as sa
+
 
 def upgrade():
-    op.create_table('geo_country_info',
+    op.create_table(
+        'geo_country_info',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -33,8 +36,16 @@ def upgrade():
         sa.Column('phone', sa.Unicode(length=16), nullable=True),
         sa.Column('postal_code_format', sa.Unicode(length=55), nullable=True),
         sa.Column('postal_code_regex', sa.Unicode(length=155), nullable=True),
-        sa.Column('languages', postgresql.ARRAY(sa.Unicode(length=7), dimensions=1), nullable=True),
-        sa.Column('neighbours', postgresql.ARRAY(sa.CHAR(length=2), dimensions=1), nullable=True),
+        sa.Column(
+            'languages',
+            postgresql.ARRAY(sa.Unicode(length=7), dimensions=1),
+            nullable=True,
+        ),
+        sa.Column(
+            'neighbours',
+            postgresql.ARRAY(sa.CHAR(length=2), dimensions=1),
+            nullable=True,
+        ),
         sa.Column('equivalent_fips_code', sa.Unicode(length=3), nullable=True),
         sa.Column('name', sa.Unicode(length=250), nullable=False),
         sa.Column('title', sa.Unicode(length=250), nullable=False),
@@ -42,13 +53,18 @@ def upgrade():
         sa.UniqueConstraint('iso_alpha2'),
         sa.UniqueConstraint('iso_alpha3'),
         sa.UniqueConstraint('name'),
-        )
-    op.create_table('geo_name',
+    )
+    op.create_table(
+        'geo_name',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.Column('ascii_title', sa.String(length=200), nullable=True),
-        sa.Column('alternate_titles', postgresql.ARRAY(sa.Unicode(length=200), dimensions=1), nullable=True),
+        sa.Column(
+            'alternate_titles',
+            postgresql.ARRAY(sa.Unicode(length=200), dimensions=1),
+            nullable=True,
+        ),
         sa.Column('latitude', sa.Numeric(), nullable=True),
         sa.Column('longitude', sa.Numeric(), nullable=True),
         sa.Column('fclass', sa.CHAR(length=1), nullable=True),
@@ -66,11 +82,12 @@ def upgrade():
         sa.Column('moddate', sa.Date(), nullable=True),
         sa.Column('name', sa.Unicode(length=250), nullable=False),
         sa.Column('title', sa.Unicode(length=250), nullable=False),
-        sa.ForeignKeyConstraint(['country'], ['geo_country_info.iso_alpha2'], ),
+        sa.ForeignKeyConstraint(['country'], ['geo_country_info.iso_alpha2']),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name'),
-        )
-    op.create_table('geo_alt_name',
+    )
+    op.create_table(
+        'geo_alt_name',
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.Column('id', sa.Integer(), nullable=False),
@@ -80,9 +97,9 @@ def upgrade():
         sa.Column('is_short_name', sa.Boolean(), nullable=True),
         sa.Column('is_colloquial', sa.Boolean(), nullable=True),
         sa.Column('is_historic', sa.Boolean(), nullable=True),
-        sa.ForeignKeyConstraint(['id'], ['geo_name.id'], ),
-        sa.PrimaryKeyConstraint('id')
-        )
+        sa.ForeignKeyConstraint(['id'], ['geo_name.id']),
+        sa.PrimaryKeyConstraint('id'),
+    )
 
 
 def downgrade():

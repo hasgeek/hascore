@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os
-from flask import g, send_from_directory, Response, redirect, get_flashed_messages, flash
+
+from flask import (
+    Response,
+    flash,
+    g,
+    get_flashed_messages,
+    redirect,
+    send_from_directory,
+)
+
 from coaster.views import get_next_url
 
 from .. import app, lastuser
@@ -21,8 +30,11 @@ def index():
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon',
+    )
 
 
 @app.route('/login')
@@ -56,7 +68,9 @@ def lastuser_error(error, error_description=None, error_uri=None):
     if error == 'access_denied':
         flash("You denied the request to login", category='error')
         return redirect(get_next_url())
-    return Response(u"Error: %s\n"
-                    u"Description: %s\n"
-                    u"URI: %s" % (error, error_description, error_uri),
-                    mimetype="text/plain")
+    return Response(
+        u"Error: %s\n"
+        u"Description: %s\n"
+        u"URI: %s" % (error, error_description, error_uri),
+        mimetype="text/plain",
+    )

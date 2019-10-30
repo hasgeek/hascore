@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy.ext.orderinglist import ordering_list
-from . import db, BaseNameMixin
+
+from . import BaseNameMixin, db
 
 __all__ = ['NetworkLink', 'networkbar_data']
 
@@ -17,14 +18,20 @@ class NetworkLink(BaseNameMixin, db.Model):
     seq = db.Column(db.SmallInteger, nullable=False)
     #: Parent for submenus
     parent_id = db.Column(None, db.ForeignKey('networklink.id'), nullable=True)
-    parent = db.relationship('NetworkLink', remote_side='NetworkLink.id',
-        backref=db.backref('children', order_by=seq, collection_class=ordering_list('seq')))
+    parent = db.relationship(
+        'NetworkLink',
+        remote_side='NetworkLink.id',
+        backref=db.backref(
+            'children', order_by=seq, collection_class=ordering_list('seq')
+        ),
+    )
     #: Is this link public? Non-public links are skipped over
     public = db.Column(db.Boolean, default=True, nullable=False)
 
     def __repr__(self):
         return u'<NetworkLink {seq} {name} "{title}">'.format(
-            seq=self.seq, name=self.name, title=self.title)
+            seq=self.seq, name=self.name, title=self.title
+        )
 
     @classmethod
     def get(cls, name):
@@ -32,15 +39,24 @@ class NetworkLink(BaseNameMixin, db.Model):
 
 
 def dictify_networklink(link):
-    return {'name': link.name,
-            'title': link.title,
-            'url': link.url,
-            'sep': link.sep,
-            'children': [dictify_networklink(l) for l in link.children if l.public] if link.children else None
-        }
+    return {
+        'name': link.name,
+        'title': link.title,
+        'url': link.url,
+        'sep': link.sep,
+        'children': (
+            [dictify_networklink(l) for l in link.children if l.public]
+            if link.children
+            else None
+        ),
+    }
 
 
 def networkbar_data():
     # Load all links into SQLAlchemy identity map but loop through just the top-level.
     # Subitems will be retrieved from the identity map without additional queries.
-    return [dictify_networklink(l) for l in NetworkLink.query.order_by(NetworkLink.seq).all() if l.public and l.parent is None]
+    return [
+        dictify_networklink(l)
+        for l in NetworkLink.query.order_by(NetworkLink.seq).all()
+        if l.public and l.parent is None
+    ]
