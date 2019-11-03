@@ -6,7 +6,9 @@ from collections import namedtuple
 from datetime import datetime
 from decimal import Decimal
 from urlparse import urljoin
+import os
 import sys
+import time
 import zipfile
 
 from progressbar import ProgressBar
@@ -113,6 +115,9 @@ def get_progressbar():
 
 
 def downloadfile(basepath, filename):
+    if os.path.exists(filename) and (time.time() - os.path.getmtime(filename)) < 86400:
+        print("Skipping download of %s" % filename)  # NOQA: T001
+        return
     print("Downloading %s..." % filename)  # NOQA: T001
     url = urljoin(basepath, filename)
     r = requests.get(url, stream=True)
@@ -157,7 +162,7 @@ def load_country_info(fd):
         if item.geonameid:
             ci = GeoCountryInfo.query.get(int(item.geonameid))
             if ci is None:
-                ci = GeoCountryInfo()
+                ci = GeoCountryInfo(geonameid=int(item.geonameid))
                 db.session.add(ci)
 
             ci.iso_alpha2 = item.iso_alpha2
@@ -176,7 +181,6 @@ def load_country_info(fd):
             ci.postal_code_format = item.postal_code_format
             ci.postal_code_regex = item.postal_code_regex
             ci.languages = item.languages.split(',')
-            ci.geonameid = int(item.geonameid)
             ci.neighbours = item.neighbours.split(',')
             ci.equivalent_fips_code = item.equivalent_fips_code
 
@@ -278,10 +282,9 @@ def load_geonames(fd):
         if item.geonameid:
             gn = GeoName.query.get(int(item.geonameid))
             if gn is None:
-                gn = GeoName()
+                gn = GeoName(geonameid=int(item.geonameid))
                 db.session.add(gn)
 
-            gn.geonameid = int(item.geonameid)
             gn.title = item.title or u''
             gn.ascii_title = item.ascii_title or unidecode(item.title or u'').replace(
                 u'@', u'a'
@@ -354,9 +357,8 @@ def load_alt_names(fd):
         if item.geonameid:
             rec = GeoAltName.query.get(int(item.id))
             if rec is None:
-                rec = GeoAltName()
+                rec = GeoAltName(id=int(item.id))
                 db.session.add(rec)
-            rec.id = int(item.id)
             rec.geonameid = int(item.geonameid)
             rec.lang = item.lang or None
             rec.title = item.title
@@ -382,9 +384,8 @@ def load_admin1_codes(fd):
         if item.geonameid:
             rec = GeoAdmin1Code.query.get(item.geonameid)
             if rec is None:
-                rec = GeoAdmin1Code()
+                rec = GeoAdmin1Code(geonameid=item.geonameid)
                 db.session.add(rec)
-            rec.geonameid = item.geonameid
             rec.title = item.title
             rec.ascii_title = item.ascii_title
             rec.country_id, rec.admin1_code = item.code.split('.')
@@ -406,9 +407,8 @@ def load_admin2_codes(fd):
         if item.geonameid:
             rec = GeoAdmin2Code.query.get(item.geonameid)
             if rec is None:
-                rec = GeoAdmin2Code()
+                rec = GeoAdmin2Code(geonameid=int(item.geonameid))
                 db.session.add(rec)
-            rec.geonameid = int(item.geonameid)
             rec.title = item.title
             rec.ascii_title = item.ascii_title
             rec.country_id, rec.admin1_code, rec.admin2_code = item.code.split('.')
