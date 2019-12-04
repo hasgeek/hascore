@@ -32,12 +32,12 @@ def upgrade():
         sa.ForeignKeyConstraint(['geonameid'], ['geo_name.id']),
         sa.PrimaryKeyConstraint('id'),
     )
-    op.drop_column(u'geo_name', 'alternate_titles')
+    op.drop_column('geo_name', 'alternate_titles')
 
 
 def downgrade():
     op.add_column(
-        u'geo_name',
+        'geo_name',
         sa.Column(
             'alternate_titles', postgresql.ARRAY(sa.VARCHAR(length=200)), nullable=True
         ),

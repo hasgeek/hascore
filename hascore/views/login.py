@@ -21,11 +21,11 @@ from ..models import db
 def index():
     resp = []
     for category, msg in get_flashed_messages(with_categories=True):
-        resp.append(u'-- %s: %s --' % (category, msg))
+        resp.append('-- %s: %s --' % (category, msg))
     if g.user:
-        resp.append(u'User: %s' % g.user)
-    resp.append(u"Hascore. Got a request?")
-    return Response(u'\n'.join(resp), mimetype="text/plain")
+        resp.append('User: %s' % g.user)
+    resp.append("Hascore. Got a request?")
+    return Response('\n'.join(resp), mimetype="text/plain")
 
 
 @app.route('/favicon.ico')
@@ -46,7 +46,7 @@ def login():
 @app.route('/logout')
 @lastuser.logout_handler
 def logout():
-    flash(u"You are now logged out", category='info')
+    flash("You are now logged out", category='info')
     return get_next_url()
 
 
@@ -69,8 +69,8 @@ def lastuser_error(error, error_description=None, error_uri=None):
         flash("You denied the request to login", category='error')
         return redirect(get_next_url())
     return Response(
-        u"Error: %s\n"
-        u"Description: %s\n"
-        u"URI: %s" % (error, error_description, error_uri),
+        "Error: %s\n"
+        "Description: %s\n"
+        "URI: %s" % (error, error_description, error_uri),
         mimetype="text/plain",
     )

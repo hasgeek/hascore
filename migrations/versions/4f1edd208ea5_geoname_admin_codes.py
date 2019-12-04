@@ -68,8 +68,8 @@ def downgrade():
         sa.Column('is_short_name', sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column('is_colloquial', sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column('is_historic', sa.BOOLEAN(), autoincrement=False, nullable=True),
-        sa.ForeignKeyConstraint(['id'], [u'geo_name.id'], name=u'geo_alt_name_id_fkey'),
-        sa.PrimaryKeyConstraint('id', name=u'geo_alt_name_pkey'),
+        sa.ForeignKeyConstraint(['id'], ['geo_name.id'], name='geo_alt_name_id_fkey'),
+        sa.PrimaryKeyConstraint('id', name='geo_alt_name_pkey'),
     )
     op.drop_table('geo_admin2_code')
     op.drop_table('geo_admin1_code')

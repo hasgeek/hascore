@@ -29,7 +29,7 @@ class NetworkLink(BaseNameMixin, db.Model):
     public = db.Column(db.Boolean, default=True, nullable=False)
 
     def __repr__(self):
-        return u'<NetworkLink {seq} {name} "{title}">'.format(
+        return '<NetworkLink {seq} {name} "{title}">'.format(
             seq=self.seq, name=self.name, title=self.title
         )
 
