@@ -313,7 +313,7 @@ class GeoName(BaseNameMixin, db.Model):
             'moddate': self.moddate.strftime('%Y-%m-%d') if self.moddate else None,
             'related': {
                 k: v.as_dict(related=False, alternate_titles=False)
-                for (k, v) in list(self.related_geonames().items())
+                for (k, v) in self.related_geonames().items()
             }
             if related
             else {},
