@@ -29,11 +29,11 @@ continent_codes = {
 
 def filtlike(q):
     return (
-        q.replace(u'%', ur'\%')
-        .replace(u'_', ur'\_')
-        .replace(u'[', u'')
-        .replace(u']', u'')
-        + u'%'
+        q.replace('%', r'\%')
+        .replace('_', r'\_')
+        .replace('[', '')
+        .replace(']', '')
+        + '%'
     )
 
 
@@ -182,7 +182,7 @@ class GeoName(BaseNameMixin, db.Model):
             state = None
         suffix = None
 
-        if (self.fclass, self.fcode) == (u'L', u'CONT'):
+        if (self.fclass, self.fcode) == ('L', 'CONT'):
             suffix = 'continent'
             country = None
             state = None
@@ -220,17 +220,17 @@ class GeoName(BaseNameMixin, db.Model):
     @property
     def use_title(self):
         usetitle = self.ascii_title
-        if self.fclass == u'A' and self.fcode.startswith(u'PCL'):
-            if u'of the' in usetitle:
-                usetitle = usetitle.split(u'of the')[-1].strip()
-            elif u'of The' in usetitle:
-                usetitle = usetitle.split(u'of The')[-1].strip()
-            elif u'of' in usetitle:
-                usetitle = usetitle.split(u'of')[-1].strip()
-        elif self.fclass == u'A' and self.fcode == 'ADM1':
+        if self.fclass == 'A' and self.fcode.startswith('PCL'):
+            if 'of the' in usetitle:
+                usetitle = usetitle.split('of the')[-1].strip()
+            elif 'of The' in usetitle:
+                usetitle = usetitle.split('of The')[-1].strip()
+            elif 'of' in usetitle:
+                usetitle = usetitle.split('of')[-1].strip()
+        elif self.fclass == 'A' and self.fcode == 'ADM1':
             usetitle = (
-                usetitle.replace(u'State of', '')
-                .replace(u'Union Territory of', '')
+                usetitle.replace('State of', '')
+                .replace('Union Territory of', '')
                 .strip()
             )
         return usetitle
@@ -256,7 +256,7 @@ class GeoName(BaseNameMixin, db.Model):
                     )
 
             with db.session.no_autoflush:
-                self.name = unicode(
+                self.name = str(
                     make_name(usetitle, maxlength=250, checkused=checkused)
                 )
 
@@ -277,7 +277,7 @@ class GeoName(BaseNameMixin, db.Model):
             related['admin1'] = self.admin1code.geoname
         if self.country and self.country.geonameid != self.geonameid:
             related['country'] = self.country.geoname
-        if (self.fclass, self.fcode) != (u'L', u'CONT') and self.country:
+        if (self.fclass, self.fcode) != ('L', 'CONT') and self.country:
             related['continent'] = GeoName.query.get(
                 continent_codes[self.country.continent]
             )
@@ -292,8 +292,8 @@ class GeoName(BaseNameMixin, db.Model):
             'short_title': self.short_title,
             'use_title': self.use_title,
             'picker_title': self.picker_title,
-            'latitude': unicode(self.latitude),
-            'longitude': unicode(self.longitude),
+            'latitude': str(self.latitude),
+            'longitude': str(self.longitude),
             'fclass': self.fclass,
             'fcode': self.fcode,
             'country': self.country_id,
@@ -305,7 +305,7 @@ class GeoName(BaseNameMixin, db.Model):
             'is_country': bool(self.has_country),
             'is_admin1': bool(self.has_admin1code),
             'is_admin2': bool(self.has_admin2code),
-            'is_continent': (self.fclass, self.fcode) == (u'L', u'CONT'),
+            'is_continent': (self.fclass, self.fcode) == ('L', 'CONT'),
             'population': self.population,
             'elevation': self.elevation,
             'dem': self.dem,
@@ -329,7 +329,7 @@ class GeoName(BaseNameMixin, db.Model):
     @classmethod
     def get_by_title(cls, titles, lang=None):
         results = set()
-        if isinstance(titles, basestring):
+        if isinstance(titles, str):
             titles = [titles]
         for title in titles:
             if lang:

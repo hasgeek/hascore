@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 
 from collections import namedtuple
 from datetime import datetime
 from decimal import Decimal
-from urlparse import urljoin
+from urllib.parse import urljoin
 import os
 import sys
 import time
@@ -27,7 +27,7 @@ from hascore.models import (
     db,
 )
 
-unicodecsv.field_size_limit(sys.maxint)
+unicodecsv.field_size_limit(sys.maxsize)
 
 
 CountryInfoRecord = namedtuple(
@@ -237,7 +237,7 @@ def load_geonames(fd):
 
     for counter, line in enumerate(fd):
         loadprogress.update(counter)
-        line = unicode(line, 'utf-8')
+        line = str(line, 'utf-8')
 
         if not line.startswith('#'):
             rec = GeoNameRecord(*line.strip().split('\t'))
@@ -285,9 +285,9 @@ def load_geonames(fd):
                 gn = GeoName(geonameid=int(item.geonameid))
                 db.session.add(gn)
 
-            gn.title = item.title or u''
-            gn.ascii_title = item.ascii_title or unidecode(item.title or u'').replace(
-                u'@', u'a'
+            gn.title = item.title or ''
+            gn.ascii_title = item.ascii_title or unidecode(item.title or '').replace(
+                '@', 'a'
             )
             gn.latitude = Decimal(item.latitude) or None
             gn.longitude = Decimal(item.longitude) or None
