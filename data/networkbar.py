@@ -7,9 +7,7 @@ if __name__ == '__main__':
 
     db.session.add_all(
         [
-            NetworkLink(
-                seq=1, name='home', title='HasGeek', url='http://hasgeek.com/'
-            ),
+            NetworkLink(seq=1, name='home', title='Hasgeek', url='http://hasgeek.com/'),
             NetworkLink(
                 seq=2, name='blog', title='Blog', url='http://blog.hasgeek.com/'
             ),
@@ -18,19 +16,11 @@ if __name__ == '__main__':
             ),
             NetworkLink(seq=4, name='hgtv', title='TV', url='http://hasgeek.tv/'),
             NetworkLink(
-                seq=5,
-                name='funnel',
-                title='Funnel',
-                url='http://funnel.hasgeek.com/',
+                seq=5, name='funnel', title='Funnel', url='http://funnel.hasgeek.com/'
             ),
+            NetworkLink(seq=6, name='geekup', title='Geekup', url='http://geekup.in/'),
             NetworkLink(
-                seq=6, name='geekup', title='Geekup', url='http://geekup.in/'
-            ),
-            NetworkLink(
-                seq=7,
-                name='hacknight',
-                title='Hacknight',
-                url='http://hacknight.in/',
+                seq=7, name='hacknight', title='Hacknight', url='http://hacknight.in/'
             ),
         ]
     )
@@ -49,11 +39,7 @@ if __name__ == '__main__':
                 url='http://fifthelephant.in/',
             ),
             NetworkLink(
-                seq=21,
-                parent=events,
-                name='pastevents',
-                title='Past events',
-                sep=True,
+                seq=21, parent=events, name='pastevents', title='Past events', sep=True
             ),
             NetworkLink(
                 seq=22,

@@ -1,4 +1,4 @@
-HasCore: HasGeek API
+Hascore: Hasgeek API
 ====================
 
 ![Build status](https://secure.travis-ci.org/hasgeek/hascore.png)
