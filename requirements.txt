@@ -6,7 +6,7 @@ git+https://github.com/hasgeek/flask-lastuser.git
 git+https://github.com/hasgeek/baseframe.git
 SQLAlchemy>=0.9
 progressbar2==3.53.1
-nltk==3.6
+nltk==3.6.2
 requests==2.25.1
 unidecode==1.2.0
 rq-dashboard==0.6.1
