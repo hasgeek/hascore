@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Geoname
 
 Revision ID: 360b99aa4993

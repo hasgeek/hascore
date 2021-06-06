@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from coaster.utils import getbool
 from coaster.views import jsonp, requestargs
 

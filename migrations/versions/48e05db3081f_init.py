@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Init
 
 Revision ID: 48e05db3081f

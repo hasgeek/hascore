@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy.ext.orderinglist import ordering_list
 
 from . import BaseNameMixin, db
@@ -45,7 +43,7 @@ def dictify_networklink(link):
         'url': link.url,
         'sep': link.sep,
         'children': (
-            [dictify_networklink(l) for l in link.children if l.public]
+            [dictify_networklink(_l) for _l in link.children if _l.public]
             if link.children
             else None
         ),
@@ -56,7 +54,7 @@ def networkbar_data():
     # Load all links into SQLAlchemy identity map but loop through just the top-level.
     # Subitems will be retrieved from the identity map without additional queries.
     return [
-        dictify_networklink(l)
-        for l in NetworkLink.query.order_by(NetworkLink.seq).all()
-        if l.public and l.parent is None
+        dictify_networklink(_l)
+        for _l in NetworkLink.query.order_by(NetworkLink.seq).all()
+        if _l.public and _l.parent is None
     ]

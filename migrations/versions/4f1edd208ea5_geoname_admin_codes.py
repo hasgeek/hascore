@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Geoname admin codes
 
 Revision ID: 4f1edd208ea5

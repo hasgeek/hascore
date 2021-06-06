@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Larger admin1 codes
 
 Revision ID: 26538acc5d0b

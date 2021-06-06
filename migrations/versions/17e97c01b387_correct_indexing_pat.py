@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Correct indexing pattern
 
 Revision ID: 17e97c01b387

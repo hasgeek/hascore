@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #: Database backend
 SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
 #: Cache type

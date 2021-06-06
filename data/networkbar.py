@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Load data for networkbar
 
 from hascore.models import NetworkLink, db

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Use UserBase2
 
 Revision ID: 3cacfc614ecd

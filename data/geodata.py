@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
-
-
 from collections import namedtuple
 from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urljoin
+import csv
 import os
 import sys
 import time
@@ -15,7 +12,6 @@ from progressbar import ProgressBar
 from unidecode import unidecode
 import progressbar.widgets
 import requests
-import unicodecsv
 
 from coaster.utils import getbool
 from hascore.models import (
@@ -27,7 +23,7 @@ from hascore.models import (
     db,
 )
 
-unicodecsv.field_size_limit(sys.maxsize)
+csv.field_size_limit(sys.maxsize)
 
 
 CountryInfoRecord = namedtuple(
@@ -134,12 +130,12 @@ def downloadfile(basepath, filename):
             ],
         ).start()
         readbytes = 0
-        with open(filename, 'wb') as f:
+        with open(filename, 'wb') as fd:
             for chunk in r.iter_content(1024):
                 if not chunk:
                     break  # Break when done. The connection remains open for Keep-Alive
                 readbytes += len(chunk)
-                f.write(chunk)
+                fd.write(chunk)
                 progress.update(readbytes)
         progress.finish()
 
@@ -153,7 +149,7 @@ def load_country_info(fd):
     progress = get_progressbar()
     countryinfo = [
         CountryInfoRecord(*row)
-        for row in unicodecsv.reader(fd, delimiter='\t')
+        for row in csv.reader(fd, delimiter='\t')
         if not row[0].startswith('#')
     ]
 
@@ -237,8 +233,6 @@ def load_geonames(fd):
 
     for counter, line in enumerate(fd):
         loadprogress.update(counter)
-        line = str(line, 'utf-8')
-
         if not line.startswith('#'):
             rec = GeoNameRecord(*line.strip().split('\t'))
             # Ignore places that have a population below 15,000, but keep places that
@@ -342,7 +336,7 @@ def load_alt_names(fd):
     geonameids = {r[0] for r in db.session.query(GeoName.id).all()}
     altnames = [
         GeoAltNameRecord(*row)
-        for counter, row in enumerate(unicodecsv.reader(fd, delimiter='\t'))
+        for counter, row in enumerate(csv.reader(fd, delimiter='\t'))
         if update_progress(counter)
         and not row[0].startswith('#')
         and int(row[1]) in geonameids
@@ -375,7 +369,7 @@ def load_admin1_codes(fd):
     progress = get_progressbar()
     admincodes = [
         GeoAdminRecord(*row)
-        for row in unicodecsv.reader(fd, delimiter='\t')
+        for row in csv.reader(fd, delimiter='\t')
         if not row[0].startswith('#')
     ]
 
@@ -398,7 +392,7 @@ def load_admin2_codes(fd):
     progress = get_progressbar()
     admincodes = [
         GeoAdminRecord(*row)
-        for row in unicodecsv.reader(fd, delimiter='\t')
+        for row in csv.reader(fd, delimiter='\t')
         if not row[0].startswith('#')
     ]
 
@@ -427,12 +421,18 @@ def main():
     ):
         downloadfile('http://download.geonames.org/export/dump/', filename)
 
-    load_country_info(open('countryInfo.txt'))
-    load_admin1_codes(open('admin1CodesASCII.txt'))
-    load_admin2_codes(open('admin2Codes.txt'))
-    load_geonames(open('IN.txt'))
-    load_geonames(open('allCountries.txt'))
-    load_alt_names(open('alternateNames.txt'))
+    with open('countryInfo.txt', newline='') as fd:
+        load_country_info(fd)
+    with open('admin1CodesASCII.txt', newline='') as fd:
+        load_admin1_codes(fd)
+    with open('admin2Codes.txt', newline='') as fd:
+        load_admin2_codes(fd)
+    with open('IN.txt', newline='') as fd:
+        load_geonames(fd)
+    with open('allCountries.txt', newline='') as fd:
+        load_geonames(fd)
+    with open('alternateNames.txt', newline='') as fd:
+        load_alt_names(fd)
 
 
 if __name__ == '__main__':

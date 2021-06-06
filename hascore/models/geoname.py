@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 
 from sqlalchemy import DDL, event
@@ -29,10 +27,7 @@ continent_codes = {
 
 def filtlike(q):
     return (
-        q.replace('%', r'\%')
-        .replace('_', r'\_')
-        .replace('[', '')
-        .replace(']', '')
+        q.replace('%', r'\%').replace('_', r'\_').replace('[', '').replace(']', '')
         + '%'
     )
 
@@ -78,6 +73,7 @@ class GeoAdmin1Code(BaseMixin, db.Model):
         uselist=False,
         primaryjoin='GeoAdmin1Code.id == foreign(GeoName.id)',
         backref='has_admin1code',
+        viewonly=True,
     )
     title = db.Column(db.UnicodeText)
     ascii_title = db.Column(db.UnicodeText)
@@ -100,6 +96,7 @@ class GeoAdmin2Code(BaseMixin, db.Model):
         uselist=False,
         primaryjoin='GeoAdmin2Code.id == foreign(GeoName.id)',
         backref='has_admin2code',
+        viewonly=True,
     )
     title = db.Column(db.UnicodeText)
     ascii_title = db.Column(db.UnicodeText)
@@ -134,6 +131,7 @@ class GeoName(BaseNameMixin, db.Model):
         uselist=False,
         primaryjoin='and_(GeoName.country_id == foreign(GeoAdmin1Code.country_id), '
         'GeoName.admin1 == foreign(GeoAdmin1Code.admin1_code))',
+        viewonly=True,
     )
     admin1_id = db.Column(None, db.ForeignKey('geo_admin1_code.id'), nullable=True)
     admin1code = db.relationship(
@@ -147,6 +145,7 @@ class GeoName(BaseNameMixin, db.Model):
         primaryjoin='and_(GeoName.country_id == foreign(GeoAdmin2Code.country_id), '
         'GeoName.admin1 == foreign(GeoAdmin2Code.admin1_code), '
         'GeoName.admin2 == foreign(GeoAdmin2Code.admin2_code))',
+        viewonly=True,
     )
     admin2_id = db.Column(None, db.ForeignKey('geo_admin2_code.id'), nullable=True)
     admin2code = db.relationship(
@@ -256,9 +255,7 @@ class GeoName(BaseNameMixin, db.Model):
                     )
 
             with db.session.no_autoflush:
-                self.name = str(
-                    make_name(usetitle, maxlength=250, checkused=checkused)
-                )
+                self.name = str(make_name(usetitle, maxlength=250, checkused=checkused))
 
     def __repr__(self):
         return '<GeoName %d %s %s %s "%s">' % (
@@ -354,7 +351,7 @@ class GeoName(BaseNameMixin, db.Model):
                     ]
                 )
         return sorted(
-            list(results),
+            results,
             key=lambda g: ({'A': 1, 'P': 2}.get(g.fclass, 0), g.population),
             reverse=True,
         )
@@ -390,7 +387,7 @@ class GeoName(BaseNameMixin, db.Model):
                             db.func.lower(GeoAltName.title).like(filtlike(ltoken))
                         )
                         .filter(
-                            db.or_(GeoAltName.lang == lang, GeoAltName.lang == None)
+                            db.or_(GeoAltName.lang == lang, GeoAltName.lang.is_(None))
                         )
                         .options(  # NOQA
                             joinedload('geoname').joinedload('country'),
@@ -465,7 +462,7 @@ class GeoName(BaseNameMixin, db.Model):
         )
         if lang:
             query = query.filter(
-                db.or_(GeoAltName.lang == None, GeoAltName.lang == lang)
+                db.or_(GeoAltName.lang.is_(None), GeoAltName.lang == lang)
             )  # NOQA
         return query
 
