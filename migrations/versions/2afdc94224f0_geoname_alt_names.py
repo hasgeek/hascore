@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Geoname alt names
 
 Revision ID: 2afdc94224f0

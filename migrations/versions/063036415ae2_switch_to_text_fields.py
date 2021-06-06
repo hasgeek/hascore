@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Switch to text fields
 
 Revision ID: 063036415ae2

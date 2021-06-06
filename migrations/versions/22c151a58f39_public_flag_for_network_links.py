@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Public flag for network links
 
 Revision ID: 22c151a58f39

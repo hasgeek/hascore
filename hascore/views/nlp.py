@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import nltk
 
 from coaster.views import jsonp, requestargs

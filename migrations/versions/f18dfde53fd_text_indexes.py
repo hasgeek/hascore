@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Text indexes
 
 Revision ID: f18dfde53fd

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from flask import Flask, abort
 from flask_assets import Bundle
 from flask_migrate import Migrate
